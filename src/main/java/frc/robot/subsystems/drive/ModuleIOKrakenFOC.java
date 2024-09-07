@@ -17,7 +17,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
@@ -30,6 +29,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -69,11 +70,14 @@ public class ModuleIOKrakenFOC implements ModuleIO {
   private final boolean INVERT_AZIMUTH = true;
   private final Rotation2d ABSOLUTE_ENCODER_OFFSET;
 
+  // Allows for synchronized execution of setting the brake or coast mode for motors
+  private static final Executor BRAKE_MODE_EXECUTOR = Executors.newFixedThreadPool(8);
+
   private final VoltageOut VOLTAGE_CONTROL = new VoltageOut(0.0).withUpdateFreqHz(0.0);
   private final TorqueCurrentFOC CURRENT_CONTROL = new TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final VelocityTorqueCurrentFOC VELOCITY_TORQUE_CURRENT_FOC =
       new VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
-  private final PositionTorqueCurrentFOC POSITION_TORQUE_CURRENT_FOC =
+  private final PositionTorqueCurrentFOC POSITION_CONTROL =
       new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final NeutralOut NEUTRAL_CONTROL = new NeutralOut().withUpdateFreqHz(0.0);
 
@@ -205,29 +209,77 @@ public class ModuleIOKrakenFOC implements ModuleIO {
 
   @Override
   public void setDriveVoltage(double volts) {
-    DRIVE_MOTOR.setControl(new VoltageOut(volts));
+    DRIVE_MOTOR.setControl(VOLTAGE_CONTROL.withOutput(volts));
   }
 
   @Override
   public void setAzimuthVoltage(double volts) {
-    AZIMUTH_MOTOR.setControl(new VoltageOut(volts));
+    AZIMUTH_MOTOR.setControl(VOLTAGE_CONTROL.withOutput(volts));
+  }
+
+  @Override
+  public void runCharacterization(double input) {
+    DRIVE_MOTOR.setControl(CURRENT_CONTROL.withOutput(input));
+  }
+
+  @Override
+  public void runDriveVelocitySetpoint(double velocityRadPerSec, double feedforward) {
+    DRIVE_MOTOR.setControl(
+        VELOCITY_TORQUE_CURRENT_FOC
+            .withVelocity(Units.radiansToRotations(velocityRadPerSec))
+            .withFeedForward(feedforward));
+  }
+
+  @Override
+  public void runAzimuthPositionSetpoint(Rotation2d setpoint) {
+    AZIMUTH_MOTOR.setControl(POSITION_CONTROL.withPosition(setpoint.getRotations()));
+  }
+
+  @Override
+  public void setDriveFeedbackGains(double p, double i, double d) {
+    DRIVE_MOTOR_CONFIG.Slot0.kP = p;
+    DRIVE_MOTOR_CONFIG.Slot0.kI = i;
+    DRIVE_MOTOR_CONFIG.Slot0.kD = d;
+
+    DRIVE_MOTOR.getConfigurator().apply(DRIVE_MOTOR_CONFIG, 0.01);
+  }
+
+  @Override
+  public void setAzimuthFeedbackGains(double p, double i, double d) {
+    AZIMUTH_MOTOR_CONFIG.Slot0.kP = p;
+    AZIMUTH_MOTOR_CONFIG.Slot0.kI = i;
+    AZIMUTH_MOTOR_CONFIG.Slot0.kD = d;
+
+    AZIMUTH_MOTOR.getConfigurator().apply(AZIMUTH_MOTOR_CONFIG, 0.01);
   }
 
   @Override
   public void setDriveBrakeMode(boolean enable) {
-    var config = new MotorOutputConfigs();
-    config.Inverted = InvertedValue.CounterClockwise_Positive;
-    config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-    DRIVE_MOTOR.getConfigurator().apply(config);
+    BRAKE_MODE_EXECUTOR.execute(
+        () -> {
+          synchronized (DRIVE_MOTOR_CONFIG) {
+            DRIVE_MOTOR_CONFIG.MotorOutput.NeutralMode =
+                (enable) ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            DRIVE_MOTOR.getConfigurator().apply(DRIVE_MOTOR_CONFIG, 0.25);
+          }
+        });
   }
 
   @Override
   public void setAzimuthBrakeMode(boolean enable) {
-    var config = new MotorOutputConfigs();
-    config.Inverted =
-        INVERT_AZIMUTH ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-    config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-    AZIMUTH_MOTOR.getConfigurator().apply(config);
-    AZIMUTH_MOTOR.setNeutralMode(config.NeutralMode);
+    BRAKE_MODE_EXECUTOR.execute(
+        () -> {
+          synchronized (AZIMUTH_MOTOR_CONFIG) {
+            AZIMUTH_MOTOR_CONFIG.MotorOutput.NeutralMode =
+                (enable) ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+            AZIMUTH_MOTOR.getConfigurator().apply(AZIMUTH_MOTOR_CONFIG, 0.25);
+          }
+        });
+  }
+
+  @Override
+  public void stop() {
+    DRIVE_MOTOR.setControl(NEUTRAL_CONTROL);
+    AZIMUTH_MOTOR.setControl(NEUTRAL_CONTROL);
   }
 }
