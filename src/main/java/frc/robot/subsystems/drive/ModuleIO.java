@@ -21,6 +21,7 @@ public interface ModuleIO {
   public static class ModuleIOInputs {
     public boolean driveMotorConnected = true;
     public boolean azimuthMotorConntected = true;
+    public boolean absoluteEncoderConnected = true;
     public boolean hasCurrentControl = false;
 
     public double drivePositionRad = 0.0;

@@ -64,6 +64,7 @@ public class ModuleIOKrakenFOC implements ModuleIO {
 
   private final TalonFXConfiguration DRIVE_MOTOR_CONFIG = new TalonFXConfiguration();
   private final TalonFXConfiguration AZIMUTH_MOTOR_CONFIG = new TalonFXConfiguration();
+  private final CANcoderConfiguration CANCODER_CONFIG = new CANcoderConfiguration();
 
   private final boolean INVERT_AZIMUTH = true;
   private final Rotation2d ABSOLUTE_ENCODER_OFFSET;
@@ -139,7 +140,9 @@ public class ModuleIOKrakenFOC implements ModuleIO {
       }
     }
 
-    CANCODER.getConfigurator().apply(new CANcoderConfiguration());
+    CANCODER_CONFIG.MagnetSensor.MagnetOffset = ABSOLUTE_ENCODER_OFFSET.getRotations();
+
+    CANCODER.getConfigurator().apply(CANCODER_CONFIG);
 
     DRIVE_POSITION = DRIVE_MOTOR.getPosition();
     DRIVE_VELOCITY = DRIVE_MOTOR.getVelocity();
@@ -168,37 +171,34 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     // Units are in rotations
     AZIMUTH_MOTOR.setPosition(CANCODER.getPosition().getValueAsDouble(), 1.0);
 
-    DRIVE_MOTOR.optimizeBusUtilization();
-    AZIMUTH_MOTOR.optimizeBusUtilization();
+    // Any status signal not explicitly given an update frequency (what we just did above) will be
+    // set to 0.0Hz in order to reduce bus util - TLDR: Only send CAN signals we actually use
+    DRIVE_MOTOR.optimizeBusUtilization(0.0, 1.0);
+    AZIMUTH_MOTOR.optimizeBusUtilization(0.0, 1.0);
   }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        DRIVE_POSITION,
-        DRIVE_VELOCITY,
-        DRIVE_APPLIED_VOLTS,
-        DRIVE_CURRENT,
-        AZIMUTH_ABSOLUTE_POSITION,
-        AZIMIUTH_POSITION,
-        AZIMUTH_VELOCITY,
-        AZIMUTH_APPLIED_VOLTS,
-        AZIMUTH_CURRENT);
+    inputs.hasCurrentControl = true; // TODO What does this do
+    inputs.driveMotorConnected =
+        BaseStatusSignal.refreshAll(
+                DRIVE_POSITION, DRIVE_VELOCITY, DRIVE_APPLIED_VOLTS, DRIVE_CURRENT)
+            .isOK();
+    inputs.azimuthMotorConntected =
+        BaseStatusSignal.refreshAll(
+                AZIMIUTH_POSITION, AZIMUTH_VELOCITY, AZIMUTH_APPLIED_VOLTS, AZIMUTH_CURRENT)
+            .isOK();
+    inputs.absoluteEncoderConnected = BaseStatusSignal.refreshAll(AZIMUTH_ABSOLUTE_POSITION).isOK();
 
-    inputs.drivePositionRad =
-        Units.rotationsToRadians(DRIVE_POSITION.getValueAsDouble()) / DRIVE_GEAR_RATIO;
-    inputs.driveVelocityRadPerSec =
-        Units.rotationsToRadians(DRIVE_VELOCITY.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+    inputs.drivePositionRad = Units.rotationsToRadians(DRIVE_POSITION.getValueAsDouble());
+    inputs.driveVelocityRadPerSec = Units.rotationsToRadians(DRIVE_VELOCITY.getValueAsDouble());
     inputs.driveAppliedVolts = DRIVE_APPLIED_VOLTS.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {DRIVE_CURRENT.getValueAsDouble()};
 
     inputs.azimuthAbsolutePosition =
-        Rotation2d.fromRotations(AZIMUTH_ABSOLUTE_POSITION.getValueAsDouble())
-            .minus(ABSOLUTE_ENCODER_OFFSET);
-    inputs.azimuthPosition =
-        Rotation2d.fromRotations(AZIMIUTH_POSITION.getValueAsDouble() / AZIMUTH_GEAR_RATIO);
-    inputs.azimuthVelocityRadPerSec =
-        Units.rotationsToRadians(AZIMUTH_VELOCITY.getValueAsDouble()) / AZIMUTH_GEAR_RATIO;
+        Rotation2d.fromRotations(AZIMUTH_ABSOLUTE_POSITION.getValueAsDouble());
+    inputs.azimuthPosition = Rotation2d.fromRotations(AZIMIUTH_POSITION.getValueAsDouble());
+    inputs.azimuthVelocityRadPerSec = Units.rotationsToRadians(AZIMUTH_VELOCITY.getValueAsDouble());
     inputs.azimuthAppliedVolts = AZIMUTH_APPLIED_VOLTS.getValueAsDouble();
     inputs.azimuthCurrentAmps = new double[] {AZIMUTH_CURRENT.getValueAsDouble()};
   }
