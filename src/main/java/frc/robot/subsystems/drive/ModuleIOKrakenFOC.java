@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -105,17 +106,38 @@ public class ModuleIOKrakenFOC implements ModuleIO {
         throw new RuntimeException("Invalid module index");
     }
 
-    var driveConfig = new TalonFXConfiguration();
-    driveConfig.CurrentLimits.SupplyCurrentLimit = 65.0;
-    driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    DRIVE_MOTOR.getConfigurator().apply(driveConfig);
-    setDriveBrakeMode(true);
+    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
+    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
+    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit = 65.0;
+    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable = true;
+    DRIVE_MOTOR_CONFIG.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
+    DRIVE_MOTOR_CONFIG.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    var turnConfig = new TalonFXConfiguration();
-    turnConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
-    turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    AZIMUTH_MOTOR.getConfigurator().apply(turnConfig);
-    setAzimuthBrakeMode(false);
+    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
+    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit = 40.0;
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable = true;
+    AZIMUTH_MOTOR_CONFIG.MotorOutput.Inverted =
+        (INVERT_AZIMUTH)
+            ? InvertedValue.Clockwise_Positive
+            : InvertedValue.CounterClockwise_Positive;
+    AZIMUTH_MOTOR_CONFIG.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    // Conversion affect getPosition(), setPosition(), and getVelocity()
+    DRIVE_MOTOR_CONFIG.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;
+    AZIMUTH_MOTOR_CONFIG.Feedback.SensorToMechanismRatio = AZIMUTH_GEAR_RATIO;
+    AZIMUTH_MOTOR_CONFIG.ClosedLoopGeneral.ContinuousWrap = true; // PID Wrapping
+
+    // Attempt to apply configurations four times, if fails womp womp
+    for (int i = 0; i < 4; i++) {
+      boolean isConfigurationErrorPresent =
+          DRIVE_MOTOR.getConfigurator().apply(DRIVE_MOTOR_CONFIG, 0.1) == StatusCode.OK;
+      isConfigurationErrorPresent =
+          AZIMUTH_MOTOR.getConfigurator().apply(AZIMUTH_MOTOR_CONFIG, 0.1) == StatusCode.OK;
+      if (!isConfigurationErrorPresent) {
+        break;
+      }
+    }
 
     CANCODER.getConfigurator().apply(new CANcoderConfiguration());
 
@@ -141,6 +163,11 @@ public class ModuleIOKrakenFOC implements ModuleIO {
         AZIMUTH_VELOCITY,
         AZIMUTH_APPLIED_VOLTS,
         AZIMUTH_CURRENT);
+
+    // TODO Check if this is right lmao
+    // Units are in rotations
+    AZIMUTH_MOTOR.setPosition(CANCODER.getPosition().getValueAsDouble(), 1.0);
+
     DRIVE_MOTOR.optimizeBusUtilization();
     AZIMUTH_MOTOR.optimizeBusUtilization();
   }
