@@ -120,7 +120,10 @@ public class ModuleIOSparkMax implements ModuleIO {
 
     inputs.azimuthAbsolutePosition =
         new Rotation2d(
-                azimuthAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
+                azimuthAbsoluteEncoder.getVoltage()
+                    / RobotController.getVoltage5V()
+                    * 2.0
+                    * Math.PI)
             .minus(absoluteEncoderOffset);
     inputs.azimuthPosition =
         Rotation2d.fromRotations(azimuthRelativeEncoder.getPosition() / AZIMUTH_GEAR_RATIO);
