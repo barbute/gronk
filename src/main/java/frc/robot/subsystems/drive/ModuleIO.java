@@ -28,11 +28,11 @@ public interface ModuleIO {
     public double driveAppliedVolts = 0.0;
     public double[] driveCurrentAmps = new double[] {};
 
-    public Rotation2d turnAbsolutePosition = new Rotation2d();
-    public Rotation2d turnPosition = new Rotation2d();
-    public double turnVelocityRadPerSec = 0.0;
-    public double turnAppliedVolts = 0.0;
-    public double[] turnCurrentAmps = new double[] {};
+    public Rotation2d azimuthAbsolutePosition = new Rotation2d();
+    public Rotation2d azimuthPosition = new Rotation2d();
+    public double azimuthVelocityRadPerSec = 0.0;
+    public double azimuthAppliedVolts = 0.0;
+    public double[] azimuthCurrentAmps = new double[] {};
   }
 
   /** Updates the set of loggable inputs. */
@@ -41,12 +41,13 @@ public interface ModuleIO {
   /** Run the drive motor at the specified voltage. */
   public default void setDriveVoltage(double volts) {}
 
-  /** Run the turn motor at the specified voltage. */
-  public default void setTurnVoltage(double volts) {}
+  /** Run the azimuth motor at the specified voltage. */
+  public default void setAzimuthVoltage(double volts) {}
 
   /** Run characterization input (amps or volts) into drive motor */
   public default void runCharacterization(double input) {}
 
+  /** Run drive to velocity setpoint with feedforward */
   public default void runDriveVelocitySetpoint(double velocityRadPerSec, double feedForward) {}
 
   /** Run to azimuth setpoint */
@@ -55,6 +56,6 @@ public interface ModuleIO {
   /** Enable or disable brake mode on the drive motor. */
   public default void setDriveBrakeMode(boolean enable) {}
 
-  /** Enable or disable brake mode on the turn motor. */
-  public default void setTurnBrakeMode(boolean enable) {}
+  /** Enable or disable brake mode on the azimuth motor. */
+  public default void setAzimuthBrakeMode(boolean enable) {}
 }

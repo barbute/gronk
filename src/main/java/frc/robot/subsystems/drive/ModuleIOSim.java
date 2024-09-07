@@ -45,12 +45,12 @@ public class ModuleIOSim implements ModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
 
-    inputs.turnAbsolutePosition =
+    inputs.azimuthAbsolutePosition =
         new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
-    inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
-    inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
-    inputs.turnAppliedVolts = turnAppliedVolts;
-    inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
+    inputs.azimuthPosition = new Rotation2d(turnSim.getAngularPositionRad());
+    inputs.azimuthVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
+    inputs.azimuthAppliedVolts = turnAppliedVolts;
+    inputs.azimuthCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
   }
 
   @Override
@@ -60,7 +60,7 @@ public class ModuleIOSim implements ModuleIO {
   }
 
   @Override
-  public void setTurnVoltage(double volts) {
+  public void setAzimuthVoltage(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     turnSim.setInputVoltage(turnAppliedVolts);
   }

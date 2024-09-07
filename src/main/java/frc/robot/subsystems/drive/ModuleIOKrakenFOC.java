@@ -39,8 +39,8 @@ import edu.wpi.first.math.util.Units;
  * "/Drive/ModuleX/TurnAbsolutePositionRad"
  */
 public class ModuleIOKrakenFOC implements ModuleIO {
-  private final TalonFX driveTalon;
-  private final TalonFX turnTalon;
+  private final TalonFX driveMotor;
+  private final TalonFX azimuthMotor;
   private final CANcoder cancoder;
 
   private final StatusSignal<Double> drivePosition;
@@ -48,41 +48,41 @@ public class ModuleIOKrakenFOC implements ModuleIO {
   private final StatusSignal<Double> driveAppliedVolts;
   private final StatusSignal<Double> driveCurrent;
 
-  private final StatusSignal<Double> turnAbsolutePosition;
-  private final StatusSignal<Double> turnPosition;
-  private final StatusSignal<Double> turnVelocity;
-  private final StatusSignal<Double> turnAppliedVolts;
-  private final StatusSignal<Double> turnCurrent;
+  private final StatusSignal<Double> azimuthAbsolutePosition;
+  private final StatusSignal<Double> azimuthPosition;
+  private final StatusSignal<Double> azimuthVelocity;
+  private final StatusSignal<Double> azimuthAppliedVolts;
+  private final StatusSignal<Double> azimuthCurrent;
 
   private final double DRIVE_GEAR_RATIO = 6.746031746031747;
-  private final double TURN_GEAR_RATIO = 21.428571428571427;
+  private final double AZIMUTH_GEAR_RATIO = 21.428571428571427;
 
-  private final boolean isTurnMotorInverted = true;
+  private final boolean isAzimuthMotorInverted = true;
   private final Rotation2d absoluteEncoderOffset;
 
   public ModuleIOKrakenFOC(int index) {
     switch (index) {
       case 0:
-        driveTalon = new TalonFX(11);
-        turnTalon = new TalonFX(21);
+        driveMotor = new TalonFX(11);
+        azimuthMotor = new TalonFX(21);
         cancoder = new CANcoder(31);
         absoluteEncoderOffset = new Rotation2d(-2.1); // MUST BE CALIBRATED
         break;
       case 1:
-        driveTalon = new TalonFX(12);
-        turnTalon = new TalonFX(22);
+        driveMotor = new TalonFX(12);
+        azimuthMotor = new TalonFX(22);
         cancoder = new CANcoder(32);
         absoluteEncoderOffset = new Rotation2d(2.008); // MUST BE CALIBRATED
         break;
       case 2:
-        driveTalon = new TalonFX(13);
-        turnTalon = new TalonFX(23);
+        driveMotor = new TalonFX(13);
+        azimuthMotor = new TalonFX(23);
         cancoder = new CANcoder(33);
         absoluteEncoderOffset = new Rotation2d(-1.01); // MUST BE CALIBRATED
         break;
       case 3:
-        driveTalon = new TalonFX(14);
-        turnTalon = new TalonFX(24);
+        driveMotor = new TalonFX(14);
+        azimuthMotor = new TalonFX(24);
         cancoder = new CANcoder(34);
         absoluteEncoderOffset = new Rotation2d(-2.52); // MUST BE CALIBRATED
         break;
@@ -93,41 +93,41 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     var driveConfig = new TalonFXConfiguration();
     driveConfig.CurrentLimits.SupplyCurrentLimit = 65.0;
     driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    driveTalon.getConfigurator().apply(driveConfig);
+    driveMotor.getConfigurator().apply(driveConfig);
     setDriveBrakeMode(true);
 
     var turnConfig = new TalonFXConfiguration();
     turnConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-    turnTalon.getConfigurator().apply(turnConfig);
-    setTurnBrakeMode(false);
+    azimuthMotor.getConfigurator().apply(turnConfig);
+    setAzimuthBrakeMode(false);
 
     cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
-    drivePosition = driveTalon.getPosition();
-    driveVelocity = driveTalon.getVelocity();
-    driveAppliedVolts = driveTalon.getMotorVoltage();
-    driveCurrent = driveTalon.getSupplyCurrent();
+    drivePosition = driveMotor.getPosition();
+    driveVelocity = driveMotor.getVelocity();
+    driveAppliedVolts = driveMotor.getMotorVoltage();
+    driveCurrent = driveMotor.getSupplyCurrent();
 
-    turnAbsolutePosition = cancoder.getAbsolutePosition();
-    turnPosition = turnTalon.getPosition();
-    turnVelocity = turnTalon.getVelocity();
-    turnAppliedVolts = turnTalon.getMotorVoltage();
-    turnCurrent = turnTalon.getSupplyCurrent();
+    azimuthAbsolutePosition = cancoder.getAbsolutePosition();
+    azimuthPosition = azimuthMotor.getPosition();
+    azimuthVelocity = azimuthMotor.getVelocity();
+    azimuthAppliedVolts = azimuthMotor.getMotorVoltage();
+    azimuthCurrent = azimuthMotor.getSupplyCurrent();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        100.0, drivePosition, turnPosition); // Required for odometry, use faster rate
+        100.0, drivePosition, azimuthPosition); // Required for odometry, use faster rate
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
-        turnAbsolutePosition,
-        turnVelocity,
-        turnAppliedVolts,
-        turnCurrent);
-    driveTalon.optimizeBusUtilization();
-    turnTalon.optimizeBusUtilization();
+        azimuthAbsolutePosition,
+        azimuthVelocity,
+        azimuthAppliedVolts,
+        azimuthCurrent);
+    driveMotor.optimizeBusUtilization();
+    azimuthMotor.optimizeBusUtilization();
   }
 
   @Override
@@ -137,11 +137,11 @@ public class ModuleIOKrakenFOC implements ModuleIO {
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,
-        turnAbsolutePosition,
-        turnPosition,
-        turnVelocity,
-        turnAppliedVolts,
-        turnCurrent);
+        azimuthAbsolutePosition,
+        azimuthPosition,
+        azimuthVelocity,
+        azimuthAppliedVolts,
+        azimuthCurrent);
 
     inputs.drivePositionRad =
         Units.rotationsToRadians(drivePosition.getValueAsDouble()) / DRIVE_GEAR_RATIO;
@@ -150,25 +150,25 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
     inputs.driveCurrentAmps = new double[] {driveCurrent.getValueAsDouble()};
 
-    inputs.turnAbsolutePosition =
-        Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
+    inputs.azimuthAbsolutePosition =
+        Rotation2d.fromRotations(azimuthAbsolutePosition.getValueAsDouble())
             .minus(absoluteEncoderOffset);
-    inputs.turnPosition =
-        Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
-    inputs.turnVelocityRadPerSec =
-        Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
-    inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-    inputs.turnCurrentAmps = new double[] {turnCurrent.getValueAsDouble()};
+    inputs.azimuthPosition =
+        Rotation2d.fromRotations(azimuthPosition.getValueAsDouble() / AZIMUTH_GEAR_RATIO);
+    inputs.azimuthVelocityRadPerSec =
+        Units.rotationsToRadians(azimuthVelocity.getValueAsDouble()) / AZIMUTH_GEAR_RATIO;
+    inputs.azimuthAppliedVolts = azimuthAppliedVolts.getValueAsDouble();
+    inputs.azimuthCurrentAmps = new double[] {azimuthCurrent.getValueAsDouble()};
   }
 
   @Override
   public void setDriveVoltage(double volts) {
-    driveTalon.setControl(new VoltageOut(volts));
+    driveMotor.setControl(new VoltageOut(volts));
   }
 
   @Override
-  public void setTurnVoltage(double volts) {
-    turnTalon.setControl(new VoltageOut(volts));
+  public void setAzimuthVoltage(double volts) {
+    azimuthMotor.setControl(new VoltageOut(volts));
   }
 
   @Override
@@ -176,18 +176,18 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     var config = new MotorOutputConfigs();
     config.Inverted = InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-    driveTalon.getConfigurator().apply(config);
+    driveMotor.getConfigurator().apply(config);
   }
 
   @Override
-  public void setTurnBrakeMode(boolean enable) {
+  public void setAzimuthBrakeMode(boolean enable) {
     var config = new MotorOutputConfigs();
     config.Inverted =
-        isTurnMotorInverted
+        isAzimuthMotorInverted
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-    turnTalon.getConfigurator().apply(config);
-    turnTalon.setNeutralMode(config.NeutralMode);
+    azimuthMotor.getConfigurator().apply(config);
+    azimuthMotor.setNeutralMode(config.NeutralMode);
   }
 }

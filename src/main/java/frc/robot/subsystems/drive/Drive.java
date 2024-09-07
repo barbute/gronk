@@ -40,12 +40,12 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
-  private static final double TRACK_WIDTH_X = Units.inchesToMeters(21.75);
-  private static final double TRACK_WIDTH_Y = Units.inchesToMeters(21.75);
+  private static final double MAX_LINEAR_SPEED_METER_PER_SEC = Units.feetToMeters(14.5);
+  private static final double TRACK_WIDTH_X_METER = Units.inchesToMeters(21.75);
+  private static final double TRACK_WIDTH_Y_METER_PER_SEC = Units.inchesToMeters(21.75);
   private static final double DRIVE_BASE_RADIUS =
-      Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
-  private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+      Math.hypot(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0);
+  private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED_METER_PER_SEC / DRIVE_BASE_RADIUS;
 
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -83,7 +83,7 @@ public class Drive extends SubsystemBase {
         () -> kinematics.toChassisSpeeds(getModuleStates()),
         this::runVelocity,
         new HolonomicPathFollowerConfig(
-            MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
+            MAX_LINEAR_SPEED_METER_PER_SEC, DRIVE_BASE_RADIUS, new ReplanningConfig()),
         () ->
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
@@ -171,7 +171,7 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED_METER_PER_SEC);
 
     // Send setpoints to modules
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
@@ -259,8 +259,8 @@ public class Drive extends SubsystemBase {
   }
 
   /** Returns the maximum linear speed in meters per sec. */
-  public double getMaxLinearSpeedMetersPerSec() {
-    return MAX_LINEAR_SPEED;
+  public double getMaxLinearSpeedMeterPerSec() {
+    return MAX_LINEAR_SPEED_METER_PER_SEC;
   }
 
   /** Returns the maximum angular speed in radians per sec. */
@@ -271,10 +271,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
-      new Translation2d(TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0),
-      new Translation2d(-TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0),
-      new Translation2d(-TRACK_WIDTH_X / 2.0, -TRACK_WIDTH_Y / 2.0)
+      new Translation2d(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
+      new Translation2d(TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
+      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
+      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER_PER_SEC / 2.0)
     };
   }
 }
