@@ -66,7 +66,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(11);
         turnTalon = new TalonFX(21);
         cancoder = new CANcoder(31);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = new Rotation2d(-2.1); // MUST BE CALIBRATED
         break;
       case 1:
         driveTalon = new TalonFX(12);
@@ -78,13 +78,13 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon = new TalonFX(13);
         turnTalon = new TalonFX(23);
         cancoder = new CANcoder(33);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = new Rotation2d(-1.01); // MUST BE CALIBRATED
         break;
       case 3:
         driveTalon = new TalonFX(14);
         turnTalon = new TalonFX(24);
         cancoder = new CANcoder(34);
-        absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+        absoluteEncoderOffset = new Rotation2d(-2.52); // MUST BE CALIBRATED
         break;
       default:
         throw new RuntimeException("Invalid module index");
@@ -100,7 +100,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.CurrentLimits.SupplyCurrentLimit = 40.0;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     turnTalon.getConfigurator().apply(turnConfig);
-    setTurnBrakeMode(true);
+    setTurnBrakeMode(false);
 
     cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
@@ -188,5 +188,6 @@ public class ModuleIOTalonFX implements ModuleIO {
             : InvertedValue.CounterClockwise_Positive;
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     turnTalon.getConfigurator().apply(config);
+    turnTalon.setNeutralMode(config.NeutralMode);
   }
 }
