@@ -19,6 +19,10 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
   @AutoLog
   public static class ModuleIOInputs {
+    public boolean driveMotorConnected = true;
+    public boolean azimuthMotorConntected = true;
+    public boolean hasCurrentControl = false;
+
     public double drivePositionRad = 0.0;
     public double driveVelocityRadPerSec = 0.0;
     public double driveAppliedVolts = 0.0;
@@ -39,6 +43,14 @@ public interface ModuleIO {
 
   /** Run the turn motor at the specified voltage. */
   public default void setTurnVoltage(double volts) {}
+
+  /** Run characterization input (amps or volts) into drive motor */
+  public default void runCharacterization(double input) {}
+
+  public default void runDriveVelocitySetpoint(double velocityRadPerSec, double feedForward) {}
+
+  /** Run to azimuth setpoint */
+  public default void runAzimuthPositionSetpoint(Rotation2d setpoint) {}
 
   /** Enable or disable brake mode on the drive motor. */
   public default void setDriveBrakeMode(boolean enable) {}
