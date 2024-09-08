@@ -42,9 +42,9 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
   private static final double MAX_LINEAR_SPEED_METER_PER_SEC = Units.feetToMeters(14.5);
   private static final double TRACK_WIDTH_X_METER = Units.inchesToMeters(21.75);
-  private static final double TRACK_WIDTH_Y_METER_PER_SEC = Units.inchesToMeters(21.75);
+  private static final double TRACK_WIDTH_Y_METER = Units.inchesToMeters(21.75);
   private static final double DRIVE_BASE_RADIUS =
-      Math.hypot(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0);
+      Math.hypot(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0);
   private static final double MAX_ANGULAR_SPEED =
       MAX_LINEAR_SPEED_METER_PER_SEC / DRIVE_BASE_RADIUS;
 
@@ -272,10 +272,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
-      new Translation2d(TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
-      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER_PER_SEC / 2.0),
-      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER_PER_SEC / 2.0)
+      new Translation2d(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0),
+      new Translation2d(TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER / 2.0),
+      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0),
+      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER / 2.0)
     };
   }
 }

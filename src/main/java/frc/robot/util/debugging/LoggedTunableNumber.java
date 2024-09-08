@@ -57,7 +57,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
     if (!hasDefault) {
       hasDefault = true;
       this.defaultValue = defaultValue;
-      if (Constants.debuggingMode) {
+      if (Constants.DEBUGGING_MODE) {
         dashboardNumber = new LoggedDashboardNumber(key, defaultValue);
       }
     }
@@ -72,7 +72,7 @@ public class LoggedTunableNumber implements DoubleSupplier {
     if (!hasDefault) {
       return 0.0;
     } else {
-      return Constants.debuggingMode ? dashboardNumber.get() : defaultValue;
+      return Constants.DEBUGGING_MODE ? dashboardNumber.get() : defaultValue;
     }
   }
 
