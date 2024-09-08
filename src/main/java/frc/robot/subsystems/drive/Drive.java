@@ -82,6 +82,8 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private DriveState driveState = DriveState.STOPPED;
+
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -178,6 +180,17 @@ public class Drive extends SubsystemBase {
 
     // Apply odometry update
     poseEstimator.update(rawGyroRotation, modulePositions);
+  }
+
+  /**
+   * Sets the subsystem's desired state, logic runs in periodic()
+   *
+   * @param desiredState The desired state
+   */
+  public void setDriveState(DriveState desiredState) {
+    driveState = desiredState;
+    // TODO: Add logic to reset the heading controller when I make that if the state is the heading
+    // controller
   }
 
   /**
