@@ -24,7 +24,6 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -273,19 +272,6 @@ public class Drive extends SubsystemBase {
     runSwerve(new ChassisSpeeds());
   }
 
-  /**
-   * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-   * return to their normal orientations the next time a nonzero velocity is requested.
-   */
-  public void stopWithX() {
-    Rotation2d[] headings = new Rotation2d[4];
-    for (int i = 0; i < 4; i++) {
-      headings[i] = getModuleTranslations()[i].getAngle();
-    }
-    kinematics.resetHeadings(headings);
-    stop();
-  }
-
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return SYSTEM_IDENTIFICATION.quasistatic(direction);
@@ -349,15 +335,5 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return MAX_ANGULAR_SPEED_RAD_PER_SEC;
-  }
-
-  /** Returns an array of module translations. */
-  public static Translation2d[] getModuleTranslations() {
-    return new Translation2d[] {
-      new Translation2d(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0),
-      new Translation2d(TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER / 2.0),
-      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0),
-      new Translation2d(-TRACK_WIDTH_X_METER / 2.0, -TRACK_WIDTH_Y_METER / 2.0)
-    };
   }
 }
