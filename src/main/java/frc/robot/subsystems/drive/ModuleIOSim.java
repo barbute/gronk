@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.subsystems.drive.DriveConstants.ModuleConfiguration;
 
 /**
  * Physics sim implementation of module IO.
@@ -59,12 +60,16 @@ public class ModuleIOSim implements ModuleIO {
   private SlewRateLimiter DRIVE_LIMITER = new SlewRateLimiter(2.5);
 
   // Simulate absolute encoder being at a random value
-  private final Rotation2d AZIMUTH_INITIAL_ABSOLUTE_POSITION =
-      new Rotation2d(Math.random() * 2.0 * Math.PI);
+  private final Rotation2d AZIMUTH_INITIAL_ABSOLUTE_POSITION;
   private double driveAppliedVolts = 0.0;
   private double azimuthAppliedVolts = 0.0;
 
   private boolean driveCoast = false;
+
+  public ModuleIOSim(ModuleConfiguration configuration) {
+    AZIMUTH_INITIAL_ABSOLUTE_POSITION = configuration.ABSOLUTE_ENCODER_OFFSET();
+    AZIMUTH_FEEDBACK.enableContinuousInput(-Math.PI, Math.PI);
+  }
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {

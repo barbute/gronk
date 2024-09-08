@@ -73,10 +73,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
+                new ModuleIOSim(DriveConstants.MODULE_CONFIGURATIONS[0]),
+                new ModuleIOSim(DriveConstants.MODULE_CONFIGURATIONS[1]),
+                new ModuleIOSim(DriveConstants.MODULE_CONFIGURATIONS[2]),
+                new ModuleIOSim(DriveConstants.MODULE_CONFIGURATIONS[3]));
         break;
 
       default:
