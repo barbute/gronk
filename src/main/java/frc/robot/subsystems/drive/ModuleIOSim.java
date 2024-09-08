@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
@@ -37,6 +38,7 @@ public class ModuleIOSim implements ModuleIO {
   private final PIDController DRIVE_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
   private final PIDController AZIMUTH_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
 
+  // Used to simulate coasting after disabled
   private SlewRateLimiter DRIVE_LIMITER = new SlewRateLimiter(2.5);
 
   // Simulate absolute encoder being at a random value
@@ -45,8 +47,20 @@ public class ModuleIOSim implements ModuleIO {
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
+  private boolean driveCoast = false;
+
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
+    if (DriverStation.isDisabled()) {
+      stop();
+    }
+
+    if (driveCoast && DriverStation.isDisabled()) {
+      setDriveVoltage(DRIVE_LIMITER.calculate(driveAppliedVolts));
+    } else {
+      DRIVE_LIMITER.reset(driveAppliedVolts);
+    }
+
     DRIVE_MOTOR.update(LOOP_PERIOD_SECS);
     AZIMUTH_MOTOR.update(LOOP_PERIOD_SECS);
 
@@ -102,6 +116,11 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public void setAzimuthFeedbackGains(double p, double i, double d) {
     AZIMUTH_FEEDBACK.setPID(p, i, d);
+  }
+
+  @Override
+  public void setDriveBrakeMode(boolean enable) {
+    driveCoast = !enable;
   }
 
   @Override
