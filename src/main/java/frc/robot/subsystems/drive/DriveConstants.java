@@ -33,6 +33,7 @@ public class DriveConstants {
   public record ModuleConstants(
       double DRIVE_S,
       double DRIVE_V,
+      double DRIVE_A,
       double DRIVE_P,
       double DRIVE_I,
       double DRIVE_D,
@@ -74,10 +75,10 @@ public class DriveConstants {
 
   public static final ModuleConstants MODULE_CONSTANTS =
       switch (Constants.CURRENT_MODE) {
-        case REAL -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case SIM -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case REPLAY -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        default -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REAL -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case SIM -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REPLAY -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        default -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       };
 
   public static final Translation2d[] MODULE_TRANSLATIONS =
