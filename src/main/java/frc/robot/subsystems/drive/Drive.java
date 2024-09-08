@@ -14,6 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.drive.DriveConstants.DRIVE_CONFIGURATION;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -29,7 +30,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,20 +40,21 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  private static final double MAX_LINEAR_SPEED_METER_PER_SEC = Units.feetToMeters(14.5);
-  private static final double TRACK_WIDTH_X_METER = Units.inchesToMeters(21.75);
-  private static final double TRACK_WIDTH_Y_METER = Units.inchesToMeters(21.75);
+  private static final double MAX_LINEAR_SPEED_METER_PER_SEC =
+      DRIVE_CONFIGURATION.MAX_LINEAR_VELOCITY_METER_PER_SEC();
+  private static final double TRACK_WIDTH_X_METER = DRIVE_CONFIGURATION.TRACK_WIDTH_X_METER();
+  private static final double TRACK_WIDTH_Y_METER = DRIVE_CONFIGURATION.TRACK_WIDTH_Y_METER();
   private static final double DRIVE_BASE_RADIUS =
       Math.hypot(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0);
   private static final double MAX_ANGULAR_SPEED =
       MAX_LINEAR_SPEED_METER_PER_SEC / DRIVE_BASE_RADIUS;
 
-  private final GyroIO gyroIO;
-  private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-  private final SysIdRoutine sysId;
+  private final GyroIO GYRO_IO;
+  private final GyroIOInputsAutoLogged GYRO_INPUTS = new GyroIOInputsAutoLogged();
+  private final Module[] MODULES = new Module[4]; // FL, FR, BL, BR
+  private final SysIdRoutine SYSTEM_IDENTIFICATION;
 
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+  private SwerveDriveKinematics kinematics = DriveConstants.KINEMATICS;
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
       new SwerveModulePosition[] {
@@ -71,11 +72,11 @@ public class Drive extends SubsystemBase {
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
       ModuleIO brModuleIO) {
-    this.gyroIO = gyroIO;
-    modules[0] = new Module(flModuleIO, 0);
-    modules[1] = new Module(frModuleIO, 1);
-    modules[2] = new Module(blModuleIO, 2);
-    modules[3] = new Module(brModuleIO, 3);
+    this.GYRO_IO = gyroIO;
+    MODULES[0] = new Module(flModuleIO, 0);
+    MODULES[1] = new Module(frModuleIO, 1);
+    MODULES[2] = new Module(blModuleIO, 2);
+    MODULES[3] = new Module(brModuleIO, 3);
 
     // Configure AutoBuilder for PathPlanner
     AutoBuilder.configureHolonomic(
@@ -101,7 +102,7 @@ public class Drive extends SubsystemBase {
         });
 
     // Configure SysId
-    sysId =
+    SYSTEM_IDENTIFICATION =
         new SysIdRoutine(
             new SysIdRoutine.Config(
                 null,
@@ -111,7 +112,7 @@ public class Drive extends SubsystemBase {
             new SysIdRoutine.Mechanism(
                 (voltage) -> {
                   for (int i = 0; i < 4; i++) {
-                    modules[i].runCharacterization(voltage.in(Volts));
+                    MODULES[i].runCharacterization(voltage.in(Volts));
                   }
                 },
                 null,
@@ -119,15 +120,15 @@ public class Drive extends SubsystemBase {
   }
 
   public void periodic() {
-    gyroIO.updateInputs(gyroInputs);
-    Logger.processInputs("Drive/Gyro", gyroInputs);
-    for (var module : modules) {
+    GYRO_IO.updateInputs(GYRO_INPUTS);
+    Logger.processInputs("Drive/Gyro", GYRO_INPUTS);
+    for (var module : MODULES) {
       module.periodic();
     }
 
     // Stop moving when disabled
     if (DriverStation.isDisabled()) {
-      for (var module : modules) {
+      for (var module : MODULES) {
         module.stop();
       }
     }
@@ -150,9 +151,9 @@ public class Drive extends SubsystemBase {
     }
 
     // Update gyro angle
-    if (gyroInputs.connected) {
+    if (GYRO_INPUTS.connected) {
       // Use the real gyro angle
-      rawGyroRotation = gyroInputs.yawPosition;
+      rawGyroRotation = GYRO_INPUTS.yawPosition;
     } else {
       // Use the angle delta from the kinematics and module deltas
       Twist2d twist = kinematics.toTwist2d(moduleDeltas);
@@ -178,7 +179,7 @@ public class Drive extends SubsystemBase {
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
       // The module returns the optimized state, useful for logging
-      optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
+      optimizedSetpointStates[i] = MODULES[i].runSetpoint(setpointStates[i]);
     }
 
     // Log setpoint states
@@ -206,12 +207,12 @@ public class Drive extends SubsystemBase {
 
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return sysId.quasistatic(direction);
+    return SYSTEM_IDENTIFICATION.quasistatic(direction);
   }
 
   /** Returns a command to run a dynamic test in the specified direction. */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return sysId.dynamic(direction);
+    return SYSTEM_IDENTIFICATION.dynamic(direction);
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
@@ -219,7 +220,7 @@ public class Drive extends SubsystemBase {
   private SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     for (int i = 0; i < 4; i++) {
-      states[i] = modules[i].getState();
+      states[i] = MODULES[i].getState();
     }
     return states;
   }
@@ -228,7 +229,7 @@ public class Drive extends SubsystemBase {
   private SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] states = new SwerveModulePosition[4];
     for (int i = 0; i < 4; i++) {
-      states[i] = modules[i].getPosition();
+      states[i] = MODULES[i].getPosition();
     }
     return states;
   }
