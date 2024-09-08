@@ -13,7 +13,6 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.DRIVE_CONFIGURATION;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -29,14 +28,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.drive.controllers.TeleoperatedController;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.characterization.DriveIdentificationRoutine;
+import frc.robot.util.characterization.DriveIdentificationRoutine.MotorType;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -70,7 +69,6 @@ public class Drive extends SubsystemBase {
   private final GyroIO GYRO_IO;
   private final GyroIOInputsAutoLogged GYRO_INPUTS = new GyroIOInputsAutoLogged();
   private final Module[] MODULES = new Module[4]; // FL, FR, BL, BR
-  private final SysIdRoutine SYSTEM_IDENTIFICATION;
 
   private SwerveDriveKinematics kinematics = DriveConstants.KINEMATICS;
   private Rotation2d rawGyroRotation = new Rotation2d();
@@ -88,6 +86,8 @@ public class Drive extends SubsystemBase {
   private DriveState driveState = DriveState.STOPPED;
   /** The currently desired chassis speeds */
   private ChassisSpeeds desiredSpeeds = new ChassisSpeeds();
+
+  private DriveIdentificationRoutine systemIdentificationRoutine = new DriveIdentificationRoutine();
 
   public Drive(
       GyroIO gyroIO,
@@ -123,23 +123,6 @@ public class Drive extends SubsystemBase {
         (targetPose) -> {
           Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
-
-    // Configure SysId
-    SYSTEM_IDENTIFICATION =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                Units.Volts.of(1).per(Units.Seconds.of(1)),
-                Units.Volts.of(3),
-                Units.Seconds.of(3),
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> {
-                  for (int i = 0; i < 4; i++) {
-                    MODULES[i].runCharacterization(voltage.in(Volts));
-                  }
-                },
-                null,
-                this));
   }
 
   public void periodic() {
@@ -273,14 +256,10 @@ public class Drive extends SubsystemBase {
     runSwerve(new ChassisSpeeds());
   }
 
-  /** Returns a command to run a quasistatic test in the specified direction. */
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    return SYSTEM_IDENTIFICATION.quasistatic(direction);
-  }
-
-  /** Returns a command to run a dynamic test in the specified direction. */
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return SYSTEM_IDENTIFICATION.dynamic(direction);
+  /** Returns a command to run a full quasistatic, dynamic forward-backward test */
+  public Command runIndetificationRoutineCommand() {
+    return systemIdentificationRoutine.executeIdentificationRoutineCommand(
+        this, MODULES, MotorType.KRAKENX60);
   }
 
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
