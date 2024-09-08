@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.Module;
 import frc.robot.util.debugging.Alert;
@@ -61,7 +63,7 @@ public class DriveIdentificationRoutine {
       case KRAKENX60:
         rampRateVoltsPerSec = Units.Volts.of(1).per(Units.Seconds.of(1));
         stepVoltage = Units.Volts.of(3);
-        timeoutSeconds = Units.Seconds.of(10);
+        timeoutSeconds = Units.Seconds.of(5);
         break;
       default:
         // Assume we are using NEOs by default
@@ -161,10 +163,18 @@ public class DriveIdentificationRoutine {
         Logger.recordOutput(key, state);
         break;
       case FALCON500:
-        SignalLogger.writeString(key, state);
+        if (Constants.CURRENT_MODE == Mode.SIM) {
+          Logger.recordOutput(key, state);
+        } else {
+          SignalLogger.writeString(key, state);
+        }
         break;
       case KRAKENX60:
-        SignalLogger.writeString(key, state);
+        if (Constants.CURRENT_MODE == Mode.SIM) {
+          Logger.recordOutput(key, state);
+        } else {
+          SignalLogger.writeString(key, state);
+        }
         break;
       default:
         break;
