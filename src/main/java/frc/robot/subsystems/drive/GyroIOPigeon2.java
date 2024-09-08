@@ -23,22 +23,28 @@ import edu.wpi.first.math.util.Units;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
-  private final Pigeon2 pigeon = new Pigeon2(10);
-  private final StatusSignal<Double> yaw = pigeon.getYaw();
-  private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
+  private final Pigeon2 PIGEON = new Pigeon2(10);
+
+  private final StatusSignal<Double> YAW = PIGEON.getYaw();
+  private final StatusSignal<Double> YAW_VELOCITY_DEGREES_PER_SEC =
+      PIGEON.getAngularVelocityZWorld();
 
   public GyroIOPigeon2() {
-    pigeon.getConfigurator().apply(new Pigeon2Configuration());
-    pigeon.getConfigurator().setYaw(0.0);
-    yaw.setUpdateFrequency(100.0);
-    yawVelocity.setUpdateFrequency(100.0);
-    pigeon.optimizeBusUtilization();
+    PIGEON.getConfigurator().apply(new Pigeon2Configuration());
+    PIGEON.getConfigurator().setYaw(0.0);
+
+    YAW.setUpdateFrequency(100.0);
+    YAW_VELOCITY_DEGREES_PER_SEC.setUpdateFrequency(100.0);
+
+    PIGEON.optimizeBusUtilization();
   }
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
-    inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-    inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+    inputs.connected =
+        BaseStatusSignal.refreshAll(YAW, YAW_VELOCITY_DEGREES_PER_SEC).equals(StatusCode.OK);
+    inputs.yawPosition = Rotation2d.fromDegrees(YAW.getValueAsDouble());
+    inputs.yawVelocityRadPerSec =
+        Units.degreesToRadians(YAW_VELOCITY_DEGREES_PER_SEC.getValueAsDouble());
   }
 }
