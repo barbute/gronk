@@ -20,9 +20,12 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.robot.util.debugging.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
+  private static final String ROOT_LOG_KEY = "Drive/Module/";
+
   private static final double WHEEL_RADIUS_METER = DRIVE_CONFIGURATION.WHEEL_RADIUS_METER();
 
   private final ModuleIO IO;
@@ -33,6 +36,19 @@ public class Module {
       new SimpleMotorFeedforward(
           MODULE_CONSTANTS.DRIVE_S(), MODULE_CONSTANTS.DRIVE_V(), MODULE_CONSTANTS.DRIVE_A());
 
+  private static final LoggedTunableNumber DRIVE_P =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveP", MODULE_CONSTANTS.DRIVE_P());
+  private static final LoggedTunableNumber DRIVE_I =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveI", MODULE_CONSTANTS.DRIVE_I());
+  private static final LoggedTunableNumber DRIVE_D =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveD", MODULE_CONSTANTS.DRIVE_D());
+  private static final LoggedTunableNumber AZIMUTH_P =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthP", MODULE_CONSTANTS.AZIMUTH_P());
+  private static final LoggedTunableNumber AZIMUTH_I =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthI", MODULE_CONSTANTS.AZIMUTH_I());
+  private static final LoggedTunableNumber AZIMUTH_D =
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthD", MODULE_CONSTANTS.AZIMUTH_D());
+
   public Module(ModuleIO io, int index) {
     this.IO = io;
     this.INDEX = index;
@@ -40,7 +56,20 @@ public class Module {
 
   public void periodic() {
     IO.updateInputs(INPUTS);
-    Logger.processInputs("Drive/Module" + Integer.toString(INDEX), INPUTS);
+    Logger.processInputs("Drive/Module" + INDEX, INPUTS);
+
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> IO.setDriveFeedbackGains(DRIVE_P.get(), DRIVE_I.get(), DRIVE_D.get()),
+        DRIVE_P,
+        DRIVE_I,
+        DRIVE_D);
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> IO.setAzimuthFeedbackGains(AZIMUTH_P.get(), AZIMUTH_I.get(), AZIMUTH_D.get()),
+        AZIMUTH_P,
+        AZIMUTH_I,
+        AZIMUTH_D);
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
