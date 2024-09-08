@@ -39,7 +39,7 @@ public class ModuleIOSim implements ModuleIO {
   private final DCMotorSim AZIMUTH_MOTOR =
       new DCMotorSim(
           DCMotor.getKrakenX60Foc(1),
-          DriveConstants.MODULE_CONFIGURATIONS[0].DRIVE_MOTOR_GEAR_RATIO(),
+          DriveConstants.MODULE_CONFIGURATIONS[0].AZIMUTH_MOTOR_GEAR_RATIO(),
           0.004);
 
   private final PIDController DRIVE_FEEDBACK =
@@ -62,7 +62,7 @@ public class ModuleIOSim implements ModuleIO {
   private final Rotation2d AZIMUTH_INITIAL_ABSOLUTE_POSITION =
       new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
-  private double turnAppliedVolts = 0.0;
+  private double azimuthAppliedVolts = 0.0;
 
   private boolean driveCoast = false;
 
@@ -91,7 +91,7 @@ public class ModuleIOSim implements ModuleIO {
             .plus(AZIMUTH_INITIAL_ABSOLUTE_POSITION);
     inputs.azimuthPosition = new Rotation2d(AZIMUTH_MOTOR.getAngularPositionRad());
     inputs.azimuthVelocityRadPerSec = AZIMUTH_MOTOR.getAngularVelocityRadPerSec();
-    inputs.azimuthAppliedVolts = turnAppliedVolts;
+    inputs.azimuthAppliedVolts = azimuthAppliedVolts;
     inputs.azimuthCurrentAmps = new double[] {Math.abs(AZIMUTH_MOTOR.getCurrentDrawAmps())};
   }
 
@@ -103,8 +103,8 @@ public class ModuleIOSim implements ModuleIO {
 
   @Override
   public void setAzimuthVoltage(double volts) {
-    turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    AZIMUTH_MOTOR.setInputVoltage(turnAppliedVolts);
+    azimuthAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    AZIMUTH_MOTOR.setInputVoltage(azimuthAppliedVolts);
   }
 
   @Override
@@ -122,7 +122,9 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public void runAzimuthPositionSetpoint(Rotation2d setpoint) {
     setAzimuthVoltage(
-        AZIMUTH_FEEDBACK.calculate(AZIMUTH_MOTOR.getAngularPositionRad(), setpoint.getRadians()));
+        AZIMUTH_FEEDBACK.calculate(
+            AZIMUTH_MOTOR.getAngularPositionRad() + AZIMUTH_INITIAL_ABSOLUTE_POSITION.getRadians(),
+            setpoint.getRadians()));
   }
 
   @Override
