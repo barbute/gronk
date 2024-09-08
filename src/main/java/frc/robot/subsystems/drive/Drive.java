@@ -62,10 +62,10 @@ public class Drive extends SubsystemBase {
       DRIVE_CONFIGURATION.MAX_LINEAR_VELOCITY_METER_PER_SEC();
   private static final double TRACK_WIDTH_X_METER = DRIVE_CONFIGURATION.TRACK_WIDTH_X_METER();
   private static final double TRACK_WIDTH_Y_METER = DRIVE_CONFIGURATION.TRACK_WIDTH_Y_METER();
-  private static final double DRIVE_BASE_RADIUS =
+  private static final double DRIVE_BASE_RADIUS_METER =
       Math.hypot(TRACK_WIDTH_X_METER / 2.0, TRACK_WIDTH_Y_METER / 2.0);
-  private static final double MAX_ANGULAR_SPEED =
-      MAX_LINEAR_SPEED_METER_PER_SEC / DRIVE_BASE_RADIUS;
+  private static final double MAX_ANGULAR_SPEED_RAD_PER_SEC =
+      MAX_LINEAR_SPEED_METER_PER_SEC / DRIVE_BASE_RADIUS_METER;
 
   private final GyroIO GYRO_IO;
   private final GyroIOInputsAutoLogged GYRO_INPUTS = new GyroIOInputsAutoLogged();
@@ -86,6 +86,8 @@ public class Drive extends SubsystemBase {
 
   private TeleoperatedController teleoperatedController = null;
   private DriveState driveState = DriveState.STOPPED;
+  /** The currently desired chassis speeds */
+  private ChassisSpeeds desiredSpeeds = new ChassisSpeeds();
 
   public Drive(
       GyroIO gyroIO,
@@ -104,9 +106,9 @@ public class Drive extends SubsystemBase {
         this::getPose,
         this::setPose,
         () -> kinematics.toChassisSpeeds(getModuleStates()),
-        this::runVelocity,
+        this::runSwerve,
         new HolonomicPathFollowerConfig(
-            MAX_LINEAR_SPEED_METER_PER_SEC, DRIVE_BASE_RADIUS, new ReplanningConfig()),
+            MAX_LINEAR_SPEED_METER_PER_SEC, DRIVE_BASE_RADIUS_METER, new ReplanningConfig()),
         () ->
             DriverStation.getAlliance().isPresent()
                 && DriverStation.getAlliance().get() == Alliance.Red,
@@ -183,6 +185,41 @@ public class Drive extends SubsystemBase {
 
     // Apply odometry update
     poseEstimator.update(rawGyroRotation, modulePositions);
+
+    // Set desired speeds and run desired actions based on the current commanded stated of the drive
+    switch (driveState) {
+      case TELEOPERATED:
+        if (teleoperatedController != null) {
+          desiredSpeeds =
+              teleoperatedController.computeChassisSpeeds(
+                  poseEstimator.getEstimatedPosition().getRotation(),
+                  kinematics.toChassisSpeeds(getModuleStates()),
+                  MAX_LINEAR_SPEED_METER_PER_SEC,
+                  MAX_ANGULAR_SPEED_RAD_PER_SEC);
+        }
+        break;
+      case TRAJECTORY:
+        break;
+      case AUTOALIGN:
+        break;
+      case CHARACTERIZATION:
+        desiredSpeeds = null;
+        break;
+      case SIMPLECHARACTERIZATION:
+        desiredSpeeds = null;
+        break;
+      case STOPPED:
+        desiredSpeeds = null;
+        stop();
+        break;
+      default:
+        desiredSpeeds = null;
+        break;
+    }
+
+    if (desiredSpeeds != null) {
+      runSwerve(desiredSpeeds);
+    }
   }
 
   /**
@@ -213,7 +250,7 @@ public class Drive extends SubsystemBase {
    *
    * @param speeds Speeds in meters/sec
    */
-  public void runVelocity(ChassisSpeeds speeds) {
+  public void runSwerve(ChassisSpeeds speeds) {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
@@ -233,7 +270,7 @@ public class Drive extends SubsystemBase {
 
   /** Stops the drive. */
   public void stop() {
-    runVelocity(new ChassisSpeeds());
+    runSwerve(new ChassisSpeeds());
   }
 
   /**
@@ -311,7 +348,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
-    return MAX_ANGULAR_SPEED;
+    return MAX_ANGULAR_SPEED_RAD_PER_SEC;
   }
 
   /** Returns an array of module translations. */
