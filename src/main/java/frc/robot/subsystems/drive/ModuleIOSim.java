@@ -75,4 +75,38 @@ public class ModuleIOSim implements ModuleIO {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     AZIMUTH_MOTOR.setInputVoltage(turnAppliedVolts);
   }
+
+  @Override
+  public void runCharacterization(double input) {
+    setDriveVoltage(input);
+  }
+
+  @Override
+  public void runDriveVelocitySetpoint(double velocityRadPerSec, double feedforward) {
+    setDriveVoltage(
+        DRIVE_FEEDBACK.calculate(DRIVE_MOTOR.getAngularVelocityRadPerSec(), velocityRadPerSec)
+            + feedforward);
+  }
+
+  @Override
+  public void runAzimuthPositionSetpoint(Rotation2d setpoint) {
+    setAzimuthVoltage(
+        AZIMUTH_FEEDBACK.calculate(AZIMUTH_MOTOR.getAngularPositionRad(), setpoint.getRadians()));
+  }
+
+  @Override
+  public void setDriveFeedbackGains(double p, double i, double d) {
+    DRIVE_FEEDBACK.setPID(p, i, d);
+  }
+
+  @Override
+  public void setAzimuthFeedbackGains(double p, double i, double d) {
+    AZIMUTH_FEEDBACK.setPID(p, i, d);
+  }
+
+  @Override
+  public void stop() {
+    setDriveVoltage(0.0);
+    setAzimuthVoltage(0.0);
+  }
 }
