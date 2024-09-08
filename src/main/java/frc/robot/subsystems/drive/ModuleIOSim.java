@@ -14,6 +14,8 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -28,40 +30,49 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), 6.75, 0.025);
-  private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
+  private final DCMotorSim DRIVE_MOTOR = new DCMotorSim(DCMotor.getKrakenX60Foc(1), 6.746, 0.025);
+  private final DCMotorSim AZIMUTH_MOTOR =
+      new DCMotorSim(DCMotor.getKrakenX60Foc(1), 21.429, 0.004);
 
-  private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
+  private final PIDController DRIVE_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
+  private final PIDController AZIMUTH_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
+
+  private SlewRateLimiter DRIVE_LIMITER = new SlewRateLimiter(2.5);
+
+  // Simulate absolute encoder being at a random value
+  private final Rotation2d AZIMUTH_INITIAL_ABSOLUTE_POSITION =
+      new Rotation2d(Math.random() * 2.0 * Math.PI);
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
-    driveSim.update(LOOP_PERIOD_SECS);
-    turnSim.update(LOOP_PERIOD_SECS);
+    DRIVE_MOTOR.update(LOOP_PERIOD_SECS);
+    AZIMUTH_MOTOR.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionRad = driveSim.getAngularPositionRad();
-    inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
+    inputs.drivePositionRad = DRIVE_MOTOR.getAngularPositionRad();
+    inputs.driveVelocityRadPerSec = DRIVE_MOTOR.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
-    inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
+    inputs.driveCurrentAmps = new double[] {Math.abs(DRIVE_MOTOR.getCurrentDrawAmps())};
 
     inputs.azimuthAbsolutePosition =
-        new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
-    inputs.azimuthPosition = new Rotation2d(turnSim.getAngularPositionRad());
-    inputs.azimuthVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
+        new Rotation2d(AZIMUTH_MOTOR.getAngularPositionRad())
+            .plus(AZIMUTH_INITIAL_ABSOLUTE_POSITION);
+    inputs.azimuthPosition = new Rotation2d(AZIMUTH_MOTOR.getAngularPositionRad());
+    inputs.azimuthVelocityRadPerSec = AZIMUTH_MOTOR.getAngularVelocityRadPerSec();
     inputs.azimuthAppliedVolts = turnAppliedVolts;
-    inputs.azimuthCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
+    inputs.azimuthCurrentAmps = new double[] {Math.abs(AZIMUTH_MOTOR.getCurrentDrawAmps())};
   }
 
   @Override
   public void setDriveVoltage(double volts) {
     driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    driveSim.setInputVoltage(driveAppliedVolts);
+    DRIVE_MOTOR.setInputVoltage(driveAppliedVolts);
   }
 
   @Override
   public void setAzimuthVoltage(double volts) {
     turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-    turnSim.setInputVoltage(turnAppliedVolts);
+    AZIMUTH_MOTOR.setInputVoltage(turnAppliedVolts);
   }
 }
