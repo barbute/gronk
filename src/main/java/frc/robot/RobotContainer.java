@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConstants;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -62,10 +63,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOKrakenFOC(0),
-                new ModuleIOKrakenFOC(1),
-                new ModuleIOKrakenFOC(2),
-                new ModuleIOKrakenFOC(3));
+                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[0]),
+                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[1]),
+                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[2]),
+                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[3]));
         break;
 
       case SIM:

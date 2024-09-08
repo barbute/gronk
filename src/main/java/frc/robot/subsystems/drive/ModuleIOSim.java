@@ -31,12 +31,29 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 public class ModuleIOSim implements ModuleIO {
   private static final double LOOP_PERIOD_SECS = 0.02;
 
-  private final DCMotorSim DRIVE_MOTOR = new DCMotorSim(DCMotor.getKrakenX60Foc(1), 6.746, 0.025);
+  private final DCMotorSim DRIVE_MOTOR =
+      new DCMotorSim(
+          DCMotor.getKrakenX60Foc(1),
+          DriveConstants.MODULE_CONFIGURATIONS[0].DRIVE_MOTOR_GEAR_RATIO(),
+          0.025);
   private final DCMotorSim AZIMUTH_MOTOR =
-      new DCMotorSim(DCMotor.getKrakenX60Foc(1), 21.429, 0.004);
+      new DCMotorSim(
+          DCMotor.getKrakenX60Foc(1),
+          DriveConstants.MODULE_CONFIGURATIONS[0].DRIVE_MOTOR_GEAR_RATIO(),
+          0.004);
 
-  private final PIDController DRIVE_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
-  private final PIDController AZIMUTH_FEEDBACK = new PIDController(0.0, 0.0, 0.0, LOOP_PERIOD_SECS);
+  private final PIDController DRIVE_FEEDBACK =
+      new PIDController(
+          DriveConstants.MODULE_CONSTANTS.DRIVE_P(),
+          DriveConstants.MODULE_CONSTANTS.DRIVE_I(),
+          DriveConstants.MODULE_CONSTANTS.DRIVE_D(),
+          LOOP_PERIOD_SECS);
+  private final PIDController AZIMUTH_FEEDBACK =
+      new PIDController(
+          DriveConstants.MODULE_CONSTANTS.AZIMUTH_P(),
+          DriveConstants.MODULE_CONSTANTS.AZIMUTH_I(),
+          DriveConstants.MODULE_CONSTANTS.AZIMUTH_D(),
+          LOOP_PERIOD_SECS);
 
   // Used to simulate coasting after disabled
   private SlewRateLimiter DRIVE_LIMITER = new SlewRateLimiter(2.5);

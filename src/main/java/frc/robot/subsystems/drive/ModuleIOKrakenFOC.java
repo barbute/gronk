@@ -29,6 +29,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.drive.DriveConstants.ModuleConfiguration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -60,14 +61,14 @@ public class ModuleIOKrakenFOC implements ModuleIO {
   private final StatusSignal<Double> AZIMUTH_APPLIED_VOLTS;
   private final StatusSignal<Double> AZIMUTH_CURRENT;
 
-  private final double DRIVE_GEAR_RATIO = 6.746031746031747;
-  private final double AZIMUTH_GEAR_RATIO = 21.428571428571427;
+  private final double DRIVE_GEAR_RATIO;
+  private final double AZIMUTH_GEAR_RATIO;
 
   private final TalonFXConfiguration DRIVE_MOTOR_CONFIG = new TalonFXConfiguration();
   private final TalonFXConfiguration AZIMUTH_MOTOR_CONFIG = new TalonFXConfiguration();
   private final CANcoderConfiguration CANCODER_CONFIG = new CANcoderConfiguration();
 
-  private final boolean INVERT_AZIMUTH = true;
+  private final boolean INVERT_AZIMUTH;
   private final Rotation2d ABSOLUTE_ENCODER_OFFSET;
 
   // Allows for synchronized execution of setting the brake or coast mode for motors
@@ -81,35 +82,16 @@ public class ModuleIOKrakenFOC implements ModuleIO {
       new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final NeutralOut NEUTRAL_CONTROL = new NeutralOut().withUpdateFreqHz(0.0);
 
-  public ModuleIOKrakenFOC(int index) {
-    switch (index) {
-      case 0:
-        DRIVE_MOTOR = new TalonFX(11);
-        AZIMUTH_MOTOR = new TalonFX(21);
-        CANCODER = new CANcoder(31);
-        ABSOLUTE_ENCODER_OFFSET = new Rotation2d(-2.1); // MUST BE CALIBRATED
-        break;
-      case 1:
-        DRIVE_MOTOR = new TalonFX(12);
-        AZIMUTH_MOTOR = new TalonFX(22);
-        CANCODER = new CANcoder(32);
-        ABSOLUTE_ENCODER_OFFSET = new Rotation2d(2.008); // MUST BE CALIBRATED
-        break;
-      case 2:
-        DRIVE_MOTOR = new TalonFX(13);
-        AZIMUTH_MOTOR = new TalonFX(23);
-        CANCODER = new CANcoder(33);
-        ABSOLUTE_ENCODER_OFFSET = new Rotation2d(-1.01); // MUST BE CALIBRATED
-        break;
-      case 3:
-        DRIVE_MOTOR = new TalonFX(14);
-        AZIMUTH_MOTOR = new TalonFX(24);
-        CANCODER = new CANcoder(34);
-        ABSOLUTE_ENCODER_OFFSET = new Rotation2d(-2.52); // MUST BE CALIBRATED
-        break;
-      default:
-        throw new RuntimeException("Invalid module index");
-    }
+  public ModuleIOKrakenFOC(ModuleConfiguration configuration) {
+    INVERT_AZIMUTH = configuration.INVERT_AZIMUTH_MOTOR();
+
+    DRIVE_GEAR_RATIO = configuration.DRIVE_MOTOR_GEAR_RATIO();
+    AZIMUTH_GEAR_RATIO = configuration.AZIMUTH_MOTOR_GEAR_RATIO();
+
+    DRIVE_MOTOR = new TalonFX(configuration.DRIVE_MOTOR_ID());
+    AZIMUTH_MOTOR = new TalonFX(configuration.AZIMUTH_MOTOR_ID());
+    CANCODER = new CANcoder(configuration.ABSOLUTE_ENCODER_ID());
+    ABSOLUTE_ENCODER_OFFSET = configuration.ABSOLUTE_ENCODER_OFFSET();
 
     DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
     DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
