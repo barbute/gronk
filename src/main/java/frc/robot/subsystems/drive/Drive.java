@@ -35,7 +35,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.drive.controllers.TeleoperatedController;
 import frc.robot.util.LocalADStarAK;
+import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -82,6 +84,7 @@ public class Drive extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+  private TeleoperatedController teleoperatedController = null;
   private DriveState driveState = DriveState.STOPPED;
 
   public Drive(
@@ -191,6 +194,18 @@ public class Drive extends SubsystemBase {
     driveState = desiredState;
     // TODO: Add logic to reset the heading controller when I make that if the state is the heading
     // controller
+  }
+
+  /**
+   * Accept the joystick input from the controllers
+   *
+   * @param xSupplier Forward-backward input
+   * @param ySupplier Left-right input
+   * @param thetaSupplier Rotational input
+   */
+  public void acceptTeleoperatedInput(
+      DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier) {
+    teleoperatedController = new TeleoperatedController(xSupplier, ySupplier, thetaSupplier);
   }
 
   /**
