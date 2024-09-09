@@ -14,7 +14,7 @@
 package frc.robot.subsystems.drive;
 
 import static frc.robot.subsystems.drive.DriveConstants.DRIVE_CONFIGURATION;
-import static frc.robot.subsystems.drive.DriveConstants.MODULE_CONSTANTS;
+import static frc.robot.subsystems.drive.DriveConstants.MODULE_GAINS;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,20 +34,20 @@ public class Module {
 
   private final SimpleMotorFeedforward driveFeedforward =
       new SimpleMotorFeedforward(
-          MODULE_CONSTANTS.DRIVE_S(), MODULE_CONSTANTS.DRIVE_V(), MODULE_CONSTANTS.DRIVE_A());
+          MODULE_GAINS.DRIVE_S(), MODULE_GAINS.DRIVE_V(), MODULE_GAINS.DRIVE_A());
 
   private static final LoggedTunableNumber DRIVE_P =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveP", MODULE_CONSTANTS.DRIVE_P());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveP", MODULE_GAINS.DRIVE_P());
   private static final LoggedTunableNumber DRIVE_I =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveI", MODULE_CONSTANTS.DRIVE_I());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveI", MODULE_GAINS.DRIVE_I());
   private static final LoggedTunableNumber DRIVE_D =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveD", MODULE_CONSTANTS.DRIVE_D());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "DriveD", MODULE_GAINS.DRIVE_D());
   private static final LoggedTunableNumber AZIMUTH_P =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthP", MODULE_CONSTANTS.AZIMUTH_P());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthP", MODULE_GAINS.AZIMUTH_P());
   private static final LoggedTunableNumber AZIMUTH_I =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthI", MODULE_CONSTANTS.AZIMUTH_I());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthI", MODULE_GAINS.AZIMUTH_I());
   private static final LoggedTunableNumber AZIMUTH_D =
-      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthD", MODULE_CONSTANTS.AZIMUTH_D());
+      new LoggedTunableNumber(ROOT_LOG_KEY + "AzimuthD", MODULE_GAINS.AZIMUTH_D());
 
   public Module(ModuleIO io, int index) {
     this.IO = io;

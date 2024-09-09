@@ -31,7 +31,7 @@ public class DriveConstants {
       double DRIVE_MOTOR_GEAR_RATIO,
       double AZIMUTH_MOTOR_GEAR_RATIO) {}
 
-  public record ModuleConstants(
+  public record ModuleGains(
       double DRIVE_S,
       double DRIVE_V,
       double DRIVE_A,
@@ -75,12 +75,12 @@ public class DriveConstants {
         }
       };
 
-  public static final ModuleConstants MODULE_CONSTANTS =
+  public static final ModuleGains MODULE_GAINS =
       switch (Constants.CURRENT_MODE) {
-        case REAL -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case SIM -> new ModuleConstants(0.0, 2.06 / 15.32, 0.0, 0.1, 0.0, 0.0, 5.0, 0.0, 0.0);
-        case REPLAY -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        default -> new ModuleConstants(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REAL -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case SIM -> new ModuleGains(0.0, 2.06 / 15.32, 0.0, 0.1, 0.0, 0.0, 5.0, 0.0, 0.0);
+        case REPLAY -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        default -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       };
 
   public static final Translation2d[] MODULE_TRANSLATIONS =

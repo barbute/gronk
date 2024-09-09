@@ -45,15 +45,15 @@ public class ModuleIOSim implements ModuleIO {
 
   private final PIDController DRIVE_FEEDBACK =
       new PIDController(
-          DriveConstants.MODULE_CONSTANTS.DRIVE_P(),
-          DriveConstants.MODULE_CONSTANTS.DRIVE_I(),
-          DriveConstants.MODULE_CONSTANTS.DRIVE_D(),
+          DriveConstants.MODULE_GAINS.DRIVE_P(),
+          DriveConstants.MODULE_GAINS.DRIVE_I(),
+          DriveConstants.MODULE_GAINS.DRIVE_D(),
           LOOP_PERIOD_SECS);
   private final PIDController AZIMUTH_FEEDBACK =
       new PIDController(
-          DriveConstants.MODULE_CONSTANTS.AZIMUTH_P(),
-          DriveConstants.MODULE_CONSTANTS.AZIMUTH_I(),
-          DriveConstants.MODULE_CONSTANTS.AZIMUTH_D(),
+          DriveConstants.MODULE_GAINS.AZIMUTH_P(),
+          DriveConstants.MODULE_GAINS.AZIMUTH_I(),
+          DriveConstants.MODULE_GAINS.AZIMUTH_D(),
           LOOP_PERIOD_SECS);
 
   // Used to simulate coasting after disabled
