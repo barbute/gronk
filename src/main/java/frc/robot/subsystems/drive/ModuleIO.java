@@ -16,7 +16,9 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+/** Hardware abstraction interface */
 public interface ModuleIO {
+  /** Set of logged inputs from the subsystem */
   @AutoLog
   public static class ModuleIOInputs {
     public boolean driveMotorConnected = true;
