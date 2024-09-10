@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static frc.robot.subsystems.drive.DriveConstants.MODULE_GAINS;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -88,9 +90,9 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     DRIVE_GEAR_RATIO = configuration.DRIVE_MOTOR_GEAR_RATIO();
     AZIMUTH_GEAR_RATIO = configuration.AZIMUTH_MOTOR_GEAR_RATIO();
 
-    DRIVE_MOTOR = new TalonFX(configuration.DRIVE_MOTOR_ID());
-    AZIMUTH_MOTOR = new TalonFX(configuration.AZIMUTH_MOTOR_ID());
-    CANCODER = new CANcoder(configuration.ABSOLUTE_ENCODER_ID());
+    DRIVE_MOTOR = new TalonFX(configuration.DRIVE_MOTOR_ID(), "drivebase");
+    AZIMUTH_MOTOR = new TalonFX(configuration.AZIMUTH_MOTOR_ID(), "drivebase");
+    CANCODER = new CANcoder(configuration.ABSOLUTE_ENCODER_ID(), "drivebase");
     ABSOLUTE_ENCODER_OFFSET = configuration.ABSOLUTE_ENCODER_OFFSET();
 
     DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
@@ -129,6 +131,10 @@ public class ModuleIOKrakenFOC implements ModuleIO {
     CANCODER_CONFIG.MagnetSensor.MagnetOffset = ABSOLUTE_ENCODER_OFFSET.getRotations();
 
     CANCODER.getConfigurator().apply(CANCODER_CONFIG);
+
+    setDriveFeedbackGains(MODULE_GAINS.DRIVE_P(), MODULE_GAINS.DRIVE_I(), MODULE_GAINS.DRIVE_D());
+    setAzimuthFeedbackGains(
+        MODULE_GAINS.AZIMUTH_P(), MODULE_GAINS.AZIMUTH_I(), MODULE_GAINS.AZIMUTH_D());
 
     DRIVE_POSITION = DRIVE_MOTOR.getPosition();
     DRIVE_VELOCITY = DRIVE_MOTOR.getVelocity();

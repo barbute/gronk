@@ -59,10 +59,10 @@ public class DriveConstants {
   public static final ModuleConfiguration[] MODULE_CONFIGURATIONS =
       switch (Constants.CURRENT_MODE) {
         case REAL -> new ModuleConfiguration[] {
-          new ModuleConfiguration(11, 21, 31, new Rotation2d(-2.1), true, 6.746, 21.429),
-          new ModuleConfiguration(12, 22, 32, new Rotation2d(2.008), true, 6.746, 21.429),
-          new ModuleConfiguration(13, 23, 33, new Rotation2d(-1.01), true, 6.746, 21.429),
-          new ModuleConfiguration(14, 24, 34, new Rotation2d(-2.52), true, 6.746, 21.429)
+          new ModuleConfiguration(11, 21, 31, Rotation2d.fromRotations(0.0), true, 6.746, 21.429),
+          new ModuleConfiguration(12, 22, 32, Rotation2d.fromRotations(0.0), true, 6.746, 21.429),
+          new ModuleConfiguration(13, 23, 33, Rotation2d.fromRotations(0.0), true, 6.746, 21.429),
+          new ModuleConfiguration(14, 24, 34, Rotation2d.fromRotations(0.0), true, 6.746, 21.429)
         };
         default -> {
           ModuleConfiguration[] configurations = new ModuleConfiguration[4];
@@ -77,7 +77,7 @@ public class DriveConstants {
 
   public static final ModuleGains MODULE_GAINS =
       switch (Constants.CURRENT_MODE) {
-        case REAL -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case REAL -> new ModuleGains(0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 2.5, 0.0, 0.0);
         case SIM -> new ModuleGains(0.0, 2.06 / 15.32, 0.0, 0.1, 0.0, 0.0, 5.0, 0.0, 0.0);
         case REPLAY -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new ModuleGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
