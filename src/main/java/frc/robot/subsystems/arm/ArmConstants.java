@@ -13,7 +13,7 @@ public class ArmConstants {
 
   public static final int LEAD_MOTOR_ID = 41;
   public static final int FOLLOW_MOTOR_ID = 42;
-  public static final int ABSOLUTE_ENCODER_ID = 43; // TODO Get this
+  public static final int ABSOLUTE_ENCODER_PORT = 2; // TODO Get this
 
   public static final double GEAR_RATIO = 96.9 / 1.0;
   public static final Rotation2d ABSOLUTE_ENCODER_OFFSET = new Rotation2d();
