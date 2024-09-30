@@ -31,6 +31,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.drive.DriveConstants.KrakenConfiguration;
 import frc.robot.subsystems.drive.DriveConstants.ModuleConfiguration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -84,33 +85,50 @@ public class ModuleIOKrakenFOC implements ModuleIO {
       new PositionTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0);
   private final NeutralOut NEUTRAL_CONTROL = new NeutralOut().withUpdateFreqHz(0.0);
 
-  public ModuleIOKrakenFOC(ModuleConfiguration configuration) {
+  public ModuleIOKrakenFOC(
+      ModuleConfiguration configuration, KrakenConfiguration krakenConfiguration) {
     INVERT_AZIMUTH = configuration.INVERT_AZIMUTH_MOTOR();
 
     DRIVE_GEAR_RATIO = configuration.DRIVE_MOTOR_GEAR_RATIO();
     AZIMUTH_GEAR_RATIO = configuration.AZIMUTH_MOTOR_GEAR_RATIO();
 
-    DRIVE_MOTOR = new TalonFX(configuration.DRIVE_MOTOR_ID(), "drivebase");
-    AZIMUTH_MOTOR = new TalonFX(configuration.AZIMUTH_MOTOR_ID(), "drivebase");
-    CANCODER = new CANcoder(configuration.ABSOLUTE_ENCODER_ID(), "drivebase");
+    DRIVE_MOTOR = new TalonFX(configuration.DRIVE_MOTOR_ID(), DriveConstants.CANBUS);
+    AZIMUTH_MOTOR = new TalonFX(configuration.AZIMUTH_MOTOR_ID(), DriveConstants.CANBUS);
+    CANCODER = new CANcoder(configuration.ABSOLUTE_ENCODER_ID(), DriveConstants.CANBUS);
     ABSOLUTE_ENCODER_OFFSET = configuration.ABSOLUTE_ENCODER_OFFSET();
 
-    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 80.0;
-    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent = -80.0;
-    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit = 65.0;
-    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable = true;
+    DRIVE_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimit =
+        krakenConfiguration.DRIVE_STATOR_CURRENT_LIMIT_AMP();
+    DRIVE_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimitEnable =
+        krakenConfiguration.DRIVE_ENABLE_STATOR_CURRENT_LIMIT();
+    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit =
+        krakenConfiguration.DRIVE_SUPPLY_CURRENT_LIMIT_AMP();
+    DRIVE_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable =
+        krakenConfiguration.DRIVE_ENABLE_SUPPLY_CURRENT_LIMIT();
+    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent =
+        krakenConfiguration.DRIVE_PEAK_FORWARD_TORQUE_CURRENT_LIMIT_AMP();
+    DRIVE_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent =
+        krakenConfiguration.DRIVE_PEAK_REVERSE_TORQUE_CURRENT_LIMIT_AMP();
     DRIVE_MOTOR_CONFIG.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.02;
-    DRIVE_MOTOR_CONFIG.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    DRIVE_MOTOR_CONFIG.MotorOutput.NeutralMode = krakenConfiguration.DRIVE_NEUTRAL_MODE();
 
-    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent = 40.0;
-    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent = -40.0;
-    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit = 40.0;
-    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable = true;
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimit =
+        krakenConfiguration.AZIMUTH_STATOR_CURRENT_LIMIT_AMP();
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.StatorCurrentLimitEnable =
+        krakenConfiguration.AZIMUTH_ENABLE_STATOR_CURRENT_LIMIT();
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimit =
+        krakenConfiguration.AZIMUTH_SUPPLY_CURRENT_LIMIT_AMP();
+    AZIMUTH_MOTOR_CONFIG.CurrentLimits.SupplyCurrentLimitEnable =
+        krakenConfiguration.AZIMUTH_ENABLE_SUPPLY_CURRENT_LIMIT();
+    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakForwardTorqueCurrent =
+        krakenConfiguration.AZIMUTH_PEAK_FORWARD_TORQUE_CURRENT_LIMIT_AMP();
+    AZIMUTH_MOTOR_CONFIG.TorqueCurrent.PeakReverseTorqueCurrent =
+        krakenConfiguration.AZIMUTH_PEAK_REVERSE_TORQUE_CURRENT_LIMIT_AMP();
     AZIMUTH_MOTOR_CONFIG.MotorOutput.Inverted =
         (INVERT_AZIMUTH)
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    AZIMUTH_MOTOR_CONFIG.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    AZIMUTH_MOTOR_CONFIG.MotorOutput.NeutralMode = krakenConfiguration.AZIMUTH_NEUTRAL_MODE();
 
     // Conversion affect getPosition(), setPosition(), and getVelocity()
     DRIVE_MOTOR_CONFIG.Feedback.SensorToMechanismRatio = DRIVE_GEAR_RATIO;

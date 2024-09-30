@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.drive;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -31,6 +32,22 @@ public class DriveConstants {
       double DRIVE_MOTOR_GEAR_RATIO,
       double AZIMUTH_MOTOR_GEAR_RATIO) {}
 
+  public record KrakenConfiguration(
+      boolean DRIVE_ENABLE_STATOR_CURRENT_LIMIT,
+      boolean AZIMUTH_ENABLE_STATOR_CURRENT_LIMIT,
+      boolean DRIVE_ENABLE_SUPPLY_CURRENT_LIMIT,
+      boolean AZIMUTH_ENABLE_SUPPLY_CURRENT_LIMIT,
+      double DRIVE_STATOR_CURRENT_LIMIT_AMP,
+      double AZIMUTH_STATOR_CURRENT_LIMIT_AMP,
+      double DRIVE_SUPPLY_CURRENT_LIMIT_AMP,
+      double AZIMUTH_SUPPLY_CURRENT_LIMIT_AMP,
+      double DRIVE_PEAK_FORWARD_TORQUE_CURRENT_LIMIT_AMP,
+      double DRIVE_PEAK_REVERSE_TORQUE_CURRENT_LIMIT_AMP,
+      double AZIMUTH_PEAK_FORWARD_TORQUE_CURRENT_LIMIT_AMP,
+      double AZIMUTH_PEAK_REVERSE_TORQUE_CURRENT_LIMIT_AMP,
+      NeutralModeValue DRIVE_NEUTRAL_MODE,
+      NeutralModeValue AZIMUTH_NEUTRAL_MODE) {}
+
   public record ModuleGains(
       double DRIVE_S,
       double DRIVE_V,
@@ -41,6 +58,9 @@ public class DriveConstants {
       double AZIMUTH_P,
       double AZIMUTH_I,
       double AZIMUTH_D) {}
+
+  public static final String CANBUS = "drivebase";
+  public static final int GYRO_ID = 10;
 
   public static final DriveConfiguration DRIVE_CONFIGURATION =
       switch (Constants.CURRENT_MODE) {
@@ -74,6 +94,23 @@ public class DriveConstants {
           // complex explanation but am too lazy rn
         }
       };
+
+  public static final KrakenConfiguration KRAKEN_CONFIGURATION =
+      new KrakenConfiguration(
+          true,
+          true,
+          true,
+          true,
+          55.0,
+          35.0,
+          65.0,
+          40.0,
+          80.0,
+          -80.0,
+          40.0,
+          -40.0,
+          NeutralModeValue.Brake,
+          NeutralModeValue.Coast);
 
   public static final ModuleGains MODULE_GAINS =
       switch (Constants.CURRENT_MODE) {

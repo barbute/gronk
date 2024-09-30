@@ -55,10 +55,14 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[0]),
-                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[1]),
-                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[2]),
-                new ModuleIOKrakenFOC(DriveConstants.MODULE_CONFIGURATIONS[3]));
+                new ModuleIOKrakenFOC(
+                    DriveConstants.MODULE_CONFIGURATIONS[0], DriveConstants.KRAKEN_CONFIGURATION),
+                new ModuleIOKrakenFOC(
+                    DriveConstants.MODULE_CONFIGURATIONS[1], DriveConstants.KRAKEN_CONFIGURATION),
+                new ModuleIOKrakenFOC(
+                    DriveConstants.MODULE_CONFIGURATIONS[2], DriveConstants.KRAKEN_CONFIGURATION),
+                new ModuleIOKrakenFOC(
+                    DriveConstants.MODULE_CONFIGURATIONS[3], DriveConstants.KRAKEN_CONFIGURATION));
         break;
 
       case SIM:
