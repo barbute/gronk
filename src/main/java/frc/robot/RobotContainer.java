@@ -52,13 +52,6 @@ public class RobotContainer {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        // drive =
-        //     new Drive(
-        //         new GyroIOPigeon2(),
-        //         new ModuleIOSparkMax(0),
-        //         new ModuleIOSparkMax(1),
-        //         new ModuleIOSparkMax(2),
-        //         new ModuleIOSparkMax(3));
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -128,6 +121,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    // Schedule drive to accept autonomous speeds from Path Planner, once auto is over drive will
+    // return to default command
+    Commands.runOnce(() -> drive.setDriveState(DriveState.AUTONOMOUS), drive).schedule();
+
     return autoChooser.get();
   }
 }

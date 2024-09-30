@@ -45,6 +45,8 @@ public class Drive extends SubsystemBase {
   public enum DriveState {
     /** Driving with input from driver controllers */
     TELEOPERATED,
+    /** Driving based on preplanned trajectories */
+    AUTONOMOUS,
     /** Driving based on a preplanned trajectory */
     TRAJECTORY,
     /** Driving to a location on a field automatically */
@@ -86,6 +88,8 @@ public class Drive extends SubsystemBase {
   private DriveState driveState = DriveState.STOPPED;
   /** The currently desired chassis speeds */
   private ChassisSpeeds desiredSpeeds = new ChassisSpeeds();
+  /** The currently desired PathPlanner chassis speeds */
+  private ChassisSpeeds pathPlannerDesiredSpeeds = new ChassisSpeeds();
 
   private DriveIdentificationRoutine systemIdentificationRoutine = new DriveIdentificationRoutine();
 
@@ -106,7 +110,7 @@ public class Drive extends SubsystemBase {
         this::getPose,
         this::setPose,
         () -> kinematics.toChassisSpeeds(getModuleStates()),
-        this::runSwerve,
+        (speeds) -> pathPlannerDesiredSpeeds = speeds,
         new HolonomicPathFollowerConfig(
             MAX_LINEAR_SPEED_METER_PER_SEC, DRIVE_BASE_RADIUS_METER, new ReplanningConfig()),
         () ->
@@ -180,6 +184,9 @@ public class Drive extends SubsystemBase {
                   MAX_LINEAR_SPEED_METER_PER_SEC,
                   MAX_ANGULAR_SPEED_RAD_PER_SEC);
         }
+        break;
+      case AUTONOMOUS:
+        desiredSpeeds = pathPlannerDesiredSpeeds;
         break;
       case TRAJECTORY:
         break;
