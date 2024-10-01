@@ -14,6 +14,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -156,5 +157,20 @@ public class ArmIOKrakenFOC implements ArmIO {
   @Override
   public void setArmCurrent(double currentAmp) {
     LEAD_MOTOR.setControl(TORQUE_CURRENT_CONTROL.withOutput(currentAmp));
+  }
+
+  @Override
+  public void setFeedbackGains(double p, double i, double d) {
+    LEAD_MOTOR_CONFIG.Slot0.kP = p;
+    LEAD_MOTOR_CONFIG.Slot0.kI = i;
+    LEAD_MOTOR_CONFIG.Slot0.kD = d;
+
+    LEAD_MOTOR.getConfigurator().apply(LEAD_MOTOR_CONFIG);
+  }
+
+  @Override
+  public void setBrakeMode(boolean enable) {
+    LEAD_MOTOR.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    FOLLOW_MOTOR.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 }
