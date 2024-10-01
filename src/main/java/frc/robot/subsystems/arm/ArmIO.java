@@ -18,12 +18,11 @@ public interface ArmIO {
 
     public Rotation2d position = new Rotation2d();
     public Rotation2d absoluteEncoderPosition = new Rotation2d();
-    public Rotation2d relativeEncoderPosition = new Rotation2d();
     public double velocityRadsPerSec = 0.0;
     public double[] appliedVolts = new double[] {};
     public double[] supplyCurrentAmps = new double[] {};
     public double[] torqueCurrentAmps = new double[] {};
-    public double[] tempCelcius = new double[] {};
+    public double[] temperatureCelsius = new double[] {};
   }
 
   /** Updates the set of loggable inputs. */

@@ -14,6 +14,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.subsystems.arm.ArmConstants.KrakenConfiguration;
 import java.util.List;
@@ -98,5 +100,43 @@ public class ArmIOKrakenFOC implements ArmIO {
 
     LEAD_MOTOR.optimizeBusUtilization(0.0, 1.0);
     FOLLOW_MOTOR.optimizeBusUtilization(0.0, 1.0);
+  }
+
+  @Override
+  public void updateInputs(ArmIOInputs inputs) {
+    inputs.leaderMotorConnected =
+        BaseStatusSignal.refreshAll(
+                INTERNAL_POSITION_ROTATION,
+                VELOCITY_ROTATION_PER_SEC,
+                APPLIED_VOLTAGE.get(0),
+                SUPPLY_CURRENT_AMP.get(0),
+                TORQUE_CURRENT_AMP.get(0),
+                TEMPERATURE_CELSIUS.get(0))
+            .isOK();
+    inputs.followerMotorConnected =
+        BaseStatusSignal.refreshAll(
+                APPLIED_VOLTAGE.get(1),
+                SUPPLY_CURRENT_AMP.get(1),
+                TORQUE_CURRENT_AMP.get(1),
+                TEMPERATURE_CELSIUS.get(1))
+            .isOK();
+    inputs.absoluteEncoderConnected = ABSOLUTE_ENCODER.isConnected();
+
+    inputs.position =
+        Rotation2d.fromRotations(
+            INTERNAL_POSITION_ROTATION.getValueAsDouble()); // Offset accounted for in configs
+    inputs.absoluteEncoderPosition =
+        Rotation2d.fromRotations(
+            ABSOLUTE_ENCODER.getAbsolutePosition()); // Mounted directly to pivot
+    inputs.velocityRadsPerSec =
+        Units.rotationsToRadians(VELOCITY_ROTATION_PER_SEC.getValueAsDouble());
+    inputs.appliedVolts =
+        APPLIED_VOLTAGE.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
+    inputs.supplyCurrentAmps =
+        SUPPLY_CURRENT_AMP.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
+    inputs.torqueCurrentAmps =
+        TORQUE_CURRENT_AMP.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
+    inputs.temperatureCelsius =
+        TEMPERATURE_CELSIUS.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
   }
 }
