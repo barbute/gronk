@@ -128,15 +128,33 @@ public class ArmIOKrakenFOC implements ArmIO {
     inputs.absoluteEncoderPosition =
         Rotation2d.fromRotations(
             ABSOLUTE_ENCODER.getAbsolutePosition()); // Mounted directly to pivot
-    inputs.velocityRadsPerSec =
+    inputs.velocityRadPerSec =
         Units.rotationsToRadians(VELOCITY_ROTATION_PER_SEC.getValueAsDouble());
-    inputs.appliedVolts =
+    inputs.appliedVolt =
         APPLIED_VOLTAGE.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
-    inputs.supplyCurrentAmps =
+    inputs.supplyCurrentAmp =
         SUPPLY_CURRENT_AMP.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
-    inputs.torqueCurrentAmps =
+    inputs.torqueCurrentAmp =
         TORQUE_CURRENT_AMP.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
     inputs.temperatureCelsius =
         TEMPERATURE_CELSIUS.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
+  }
+
+  @Override
+  public void setArmVoltage(double voltage) {
+    LEAD_MOTOR.setControl(VOLTAGE_CONTROL.withOutput(voltage));
+  }
+
+  @Override
+  public void setArmPositionSetpoint(Rotation2d positionSetpoint, double feedforward) {
+    LEAD_MOTOR.setControl(
+        POSSITION_TORQUE_CURRENT_CONTROL
+            .withPosition(positionSetpoint.getRotations())
+            .withFeedForward(feedforward));
+  }
+
+  @Override
+  public void setArmCurrent(double currentAmp) {
+    LEAD_MOTOR.setControl(TORQUE_CURRENT_CONTROL.withOutput(currentAmp));
   }
 }

@@ -18,10 +18,10 @@ public interface ArmIO {
 
     public Rotation2d position = new Rotation2d();
     public Rotation2d absoluteEncoderPosition = new Rotation2d();
-    public double velocityRadsPerSec = 0.0;
-    public double[] appliedVolts = new double[] {};
-    public double[] supplyCurrentAmps = new double[] {};
-    public double[] torqueCurrentAmps = new double[] {};
+    public double velocityRadPerSec = 0.0;
+    public double[] appliedVolt = new double[] {};
+    public double[] supplyCurrentAmp = new double[] {};
+    public double[] torqueCurrentAmp = new double[] {};
     public double[] temperatureCelsius = new double[] {};
   }
 
@@ -29,10 +29,13 @@ public interface ArmIO {
   public default void updateInputs(ArmIOInputs inputs) {}
 
   /** Run the motors at the specified voltage. */
-  public default void setArmVoltage(double volts) {}
+  public default void setArmVoltage(double voltage) {}
 
   /** Run to the setpoint */
-  public default void runPosition(Rotation2d setpoint) {}
+  public default void setArmPositionSetpoint(Rotation2d setpoint, double feedforward) {}
+
+  /** Run the motors at the specified current */
+  public default void setArmCurrent(double currentAmp) {}
 
   /** Set the on-board PID gains for the motors */
   public default void setFeedbackGains(double p, double i, double d) {}
