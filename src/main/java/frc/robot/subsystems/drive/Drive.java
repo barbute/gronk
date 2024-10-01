@@ -207,8 +207,13 @@ public class Drive extends SubsystemBase {
         break;
     }
 
+    if (driveState != null) {
+      Logger.recordOutput("Drive/State", driveState);
+    }
+
     if (desiredSpeeds != null) {
       runSwerve(desiredSpeeds);
+      Logger.recordOutput("Drive/DesiredSpeeds", desiredSpeeds);
     }
   }
 
