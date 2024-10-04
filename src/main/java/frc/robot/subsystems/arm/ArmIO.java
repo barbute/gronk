@@ -19,7 +19,7 @@ public interface ArmIO {
     public Rotation2d position = new Rotation2d();
     public Rotation2d absoluteEncoderPosition = new Rotation2d();
     public double velocityRadPerSec = 0.0;
-    public double[] appliedVolt = new double[] {};
+    public double[] appliedVolts = new double[] {};
     public double[] supplyCurrentAmp = new double[] {};
     public double[] torqueCurrentAmp = new double[] {};
     public double[] temperatureCelsius = new double[] {};

@@ -131,7 +131,7 @@ public class ArmIOKrakenFOC implements ArmIO {
             ABSOLUTE_ENCODER.getAbsolutePosition()); // Mounted directly to pivot
     inputs.velocityRadPerSec =
         Units.rotationsToRadians(VELOCITY_ROTATION_PER_SEC.getValueAsDouble());
-    inputs.appliedVolt =
+    inputs.appliedVolts =
         APPLIED_VOLTAGE.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
     inputs.supplyCurrentAmp =
         SUPPLY_CURRENT_AMP.stream().mapToDouble(StatusSignal::getValueAsDouble).toArray();
