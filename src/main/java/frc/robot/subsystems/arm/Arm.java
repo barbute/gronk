@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.debugging.LoggedTunableNumber;
 import java.util.function.Supplier;
@@ -24,7 +26,11 @@ public class Arm extends SubsystemBase {
     /** Custom setpoint used for debugging purposes */
     CUSTOM(
         () ->
-            Rotation2d.fromDegrees(new LoggedTunableNumber("Arm/CustomSetpointDegree", 0.0).get()));
+            Rotation2d.fromDegrees(new LoggedTunableNumber("Arm/CustomSetpointDegree", 0.0).get())),
+    /** Hold current position (where-ever the arm was when this state was invoked) */
+    HOLD(() -> Rotation2d.fromDegrees(0.0)),
+    /** Stop the arm */
+    STOPPED(() -> Rotation2d.fromDegrees(0.0));
 
     // We use suppliers so that dynamically updating setpoints can actually supply their changing
     // pose when we call them
@@ -44,6 +50,35 @@ public class Arm extends SubsystemBase {
 
   private final ArmIO ARM_IO;
   private final ArmIOInputsAutoLogged ARM_INPUTS = new ArmIOInputsAutoLogged();
+
+  private ArmState armState = ArmState.STOPPED;
+  private Rotation2d armPositionSetpoint = new Rotation2d();
+
+  private TrapezoidProfile.Constraints currentConstraints = ArmConstants.MOTION_PROFILE_CONSTRAINTS;
+  private TrapezoidProfile profile;
+  private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
+
+  private final ArmFeedforward FEEDFORWARD =
+      new ArmFeedforward(
+          ArmConstants.ARM_GAINS.S(),
+          ArmConstants.ARM_GAINS.G(),
+          ArmConstants.ARM_GAINS.V(),
+          ArmConstants.ARM_GAINS.A());
+
+  private LoggedTunableNumber feedbackP =
+      new LoggedTunableNumber("Arm/Feedback/P", ArmConstants.ARM_GAINS.P());
+  private LoggedTunableNumber feedbackI =
+      new LoggedTunableNumber("Arm/Feedback/I", ArmConstants.ARM_GAINS.I());
+  private LoggedTunableNumber feedbackD =
+      new LoggedTunableNumber("Arm/Feedback/D", ArmConstants.ARM_GAINS.D());
+  private LoggedTunableNumber feedforwardS =
+      new LoggedTunableNumber("Arm/Feedforward/S", ArmConstants.ARM_GAINS.S());
+  private LoggedTunableNumber feedforwardG =
+      new LoggedTunableNumber("Arm/Feedforward/G", ArmConstants.ARM_GAINS.G());
+  private LoggedTunableNumber feedforwardV =
+      new LoggedTunableNumber("Arm/Feedforward/V", ArmConstants.ARM_GAINS.V());
+  private LoggedTunableNumber feedforwardA =
+      new LoggedTunableNumber("Arm/Feedforward/A", ArmConstants.ARM_GAINS.A());
 
   /** Creates a new Arm. */
   public Arm(ArmIO armIO) {

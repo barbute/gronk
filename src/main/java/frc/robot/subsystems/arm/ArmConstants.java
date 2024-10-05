@@ -6,6 +6,7 @@ package frc.robot.subsystems.arm;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Constants;
 
 /** Arm constants class */
@@ -49,6 +50,9 @@ public class ArmConstants {
         case SIM -> new ArmGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new ArmGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       };
+
+  public static final TrapezoidProfile.Constraints MOTION_PROFILE_CONSTRAINTS =
+      new TrapezoidProfile.Constraints(2.0 * Math.PI, 15.0);
 
   public static final KrakenConfiguration ARM_CONFIGURATION =
       new KrakenConfiguration(true, true, true, 80.0, 30.0, 80.0, -80.0, NeutralModeValue.Brake);
