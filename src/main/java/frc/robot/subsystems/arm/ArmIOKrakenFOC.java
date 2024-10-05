@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -172,5 +173,10 @@ public class ArmIOKrakenFOC implements ArmIO {
   public void setBrakeMode(boolean enable) {
     LEAD_MOTOR.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     FOLLOW_MOTOR.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+  }
+
+  @Override
+  public void stop() {
+    LEAD_MOTOR.setControl(new NeutralOut());
   }
 }
