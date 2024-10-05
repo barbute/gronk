@@ -69,6 +69,21 @@ public class ArmIOSim implements ArmIO {
       FEEDBACK.reset();
       feedbackNeedsReset = false;
     }
+    double setpointVolts =
+        FEEDBACK.calculate(ARM.getAngleRads(), setpoint.getRadians() + positionOffsetRad)
+            + feedforward;
+    setArmVoltage(setpointVolts);
+  }
+
+  @Override
+  public void setFeedbackGains(double p, double i, double d) {
+    FEEDBACK.setPID(p, i, d);
+  }
+
+  @Override
+  public void stop() {
+    appliedVoltage = 0.0;
+    ARM.setInputVoltage(appliedVoltage);
   }
 
   private void setPosition(double positionRad) {

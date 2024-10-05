@@ -42,4 +42,7 @@ public interface ArmIO {
 
   /** Enable or disable brake mode on the motors */
   public default void setBrakeMode(boolean enable) {}
+
+  /** Set motor to cease motion */
+  public default void stop() {}
 }
