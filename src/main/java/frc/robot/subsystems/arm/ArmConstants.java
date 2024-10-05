@@ -35,6 +35,7 @@ public class ArmConstants {
   public static final int ABSOLUTE_ENCODER_PORT = 2; // TODO Get this
 
   /*
+   * Helpful conversion factors:
    * rotations = (meters/(2*pi*wheelRadiusMeters))*gearRatio
    * meters = (rotations/gearRatio)*(2*pi*wheelRadiusMeters)
    */
@@ -53,7 +54,7 @@ public class ArmConstants {
       new KrakenConfiguration(true, true, true, 80.0, 30.0, 80.0, -80.0, NeutralModeValue.Brake);
 
   public static final SimulationConfiguration SIMULATION_ARM_CONFIGURATION =
-      new SimulationConfiguration(
+      new SimulationConfiguration( // TODO Get this
           true,
           0.0,
           0.0,
