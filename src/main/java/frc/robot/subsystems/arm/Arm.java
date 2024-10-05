@@ -71,14 +71,11 @@ public class Arm extends SubsystemBase {
       new LoggedTunableNumber("Arm/Feedback/I", ArmConstants.ARM_GAINS.I());
   private LoggedTunableNumber feedbackD =
       new LoggedTunableNumber("Arm/Feedback/D", ArmConstants.ARM_GAINS.D());
-  private LoggedTunableNumber feedforwardS =
-      new LoggedTunableNumber("Arm/Feedforward/S", ArmConstants.ARM_GAINS.S());
-  private LoggedTunableNumber feedforwardG =
-      new LoggedTunableNumber("Arm/Feedforward/G", ArmConstants.ARM_GAINS.G());
-  private LoggedTunableNumber feedforwardV =
-      new LoggedTunableNumber("Arm/Feedforward/V", ArmConstants.ARM_GAINS.V());
-  private LoggedTunableNumber feedforwardA =
-      new LoggedTunableNumber("Arm/Feedforward/A", ArmConstants.ARM_GAINS.A());
+  private LoggedTunableNumber motionV =
+      new LoggedTunableNumber("Arm/Motion/V", ArmConstants.MOTION_PROFILE_CONSTRAINTS.maxVelocity);
+  private LoggedTunableNumber motionA =
+      new LoggedTunableNumber(
+          "Arm/Motion/A", ArmConstants.MOTION_PROFILE_CONSTRAINTS.maxAcceleration);
 
   /** Creates a new Arm. */
   public Arm(ArmIO armIO) {
@@ -89,5 +86,33 @@ public class Arm extends SubsystemBase {
   public void periodic() {
     ARM_IO.updateInputs(ARM_INPUTS);
     Logger.processInputs("Arm/Inputs", ARM_INPUTS);
+
+    LoggedTunableNumber.ifChanged(
+        hashCode(),
+        () -> setFeedbackGains(feedbackP.get(), feedbackI.get(), feedbackD.get()),
+        feedbackP,
+        feedbackI,
+        feedbackD);
+    LoggedTunableNumber.ifChanged(
+        hashCode(), () -> setMotionConstraints(motionV.get(), motionA.get()), motionV, motionA);
+  }
+
+  /**
+   * Sets the subsystem's desired state, logic runs in periodic()
+   *
+   * @param desiredState The desired state
+   */
+  public void setArmState(ArmState desiredState) {
+    armState = desiredState;
+  }
+
+  /** Set the feedback controller's gains */
+  private void setFeedbackGains(double p, double i, double d) {
+    ARM_IO.setFeedbackGains(p, i, d);
+  }
+
+  /** Set the trapezoidal motion-profile's constraints */
+  private void setMotionConstraints(double maxVelocity, double maxAcceleration) {
+    currentConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
   }
 }
