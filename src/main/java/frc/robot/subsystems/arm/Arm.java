@@ -7,6 +7,7 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.debugging.LoggedTunableNumber;
 import java.util.function.Supplier;
@@ -87,6 +88,12 @@ public class Arm extends SubsystemBase {
     ARM_IO.updateInputs(ARM_INPUTS);
     Logger.processInputs("Arm/Inputs", ARM_INPUTS);
 
+    if (DriverStation.isDisabled()) {
+      stop();
+      // Reset profile when disabled
+      setpointState = new TrapezoidProfile.State(ARM_INPUTS.position.getRadians(), 0.0);
+    }
+
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> setFeedbackGains(feedbackP.get(), feedbackI.get(), feedbackD.get()),
@@ -104,6 +111,13 @@ public class Arm extends SubsystemBase {
    */
   public void setArmState(ArmState desiredState) {
     armState = desiredState;
+  }
+
+  /** Stops the IO, sets position setpoint to null, commands subsystem state to STOPPED */
+  public void stop() {
+    armState = ArmState.STOPPED;
+    armPositionSetpoint = null;
+    ARM_IO.stop();
   }
 
   /** Set the feedback controller's gains */

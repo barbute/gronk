@@ -14,7 +14,6 @@ import frc.robot.Constants;
 /** Swerve constants class */
 public class DriveConstants {
   public record DriveConfiguration(
-      int GYRO_ID,
       double WHEEL_RADIUS_METER,
       double TRACK_WIDTH_X_METER,
       double TRACK_WIDTH_Y_METER,
@@ -65,7 +64,6 @@ public class DriveConstants {
   public static final DriveConfiguration DRIVE_CONFIGURATION =
       switch (Constants.CURRENT_MODE) {
         case REAL, SIM -> new DriveConfiguration(
-            10,
             Units.inchesToMeters(2.0),
             Units.inchesToMeters(21.75),
             Units.inchesToMeters(21.75),
@@ -73,7 +71,7 @@ public class DriveConstants {
             Units.feetToMeters(50.0),
             12.0,
             6.0);
-        default -> new DriveConfiguration(10, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        default -> new DriveConfiguration(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       };
 
   public static final ModuleConfiguration[] MODULE_CONFIGURATIONS =

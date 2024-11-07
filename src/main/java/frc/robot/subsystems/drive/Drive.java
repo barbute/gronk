@@ -83,7 +83,6 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
-
   private TeleoperatedController teleoperatedController = null;
   private DriveState driveState = DriveState.STOPPED;
   /** The currently desired chassis speeds */

@@ -75,7 +75,7 @@ public class ArmIOKrakenFOC implements ArmIO {
     // Use internal sensor after reset; Because the internal sensor makes use of the Kraken's output
     // shaft to count rotations (and the motor is geared) we must account for this when using
     // internal PID control
-    LEAD_MOTOR_CONFIG.Feedback.RotorToSensorRatio = ArmConstants.GEAR_RATIO;
+    LEAD_MOTOR_CONFIG.Feedback.SensorToMechanismRatio = ArmConstants.GEAR_RATIO;
     LEAD_MOTOR_CONFIG.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
 
     LEAD_MOTOR.getConfigurator().apply(LEAD_MOTOR_CONFIG, 1.0);
