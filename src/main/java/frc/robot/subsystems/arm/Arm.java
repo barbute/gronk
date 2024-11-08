@@ -4,18 +4,21 @@
 
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.debugging.LoggedTunableNumber;
+import frc.robot.util.math.EqualsUtil;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
-  /** State the arm subsystem is in */
-  public enum ArmState {
+  /** Angular position goal for the Arm */
+  public enum ArmGoal {
     /** Fixed setpoint for the subwoofer */
     SUBWOOFER(() -> Rotation2d.fromDegrees(0.0)),
     /** Fixed setpoint for optimal intaking */
@@ -26,33 +29,28 @@ public class Arm extends SubsystemBase {
     AIM(() -> Rotation2d.fromDegrees(0.0)),
     /** Custom setpoint used for debugging purposes */
     CUSTOM(
-        () ->
-            Rotation2d.fromDegrees(new LoggedTunableNumber("Arm/CustomSetpointDegree", 0.0).get())),
-    /** Hold current position (where-ever the arm was when this state was invoked) */
-    HOLD(() -> Rotation2d.fromDegrees(0.0)),
-    /** Stop the arm */
-    STOPPED(() -> Rotation2d.fromDegrees(0.0));
+        () -> Rotation2d.fromDegrees(new LoggedTunableNumber("Arm/CustomGoalDegrees", 0.0).get()));
 
     // We use suppliers so that dynamically updating setpoints can actually supply their changing
     // pose when we call them
-    private Supplier<Rotation2d> setpointSupplier;
+    private Supplier<Rotation2d> goalSupplier;
 
-    ArmState(Supplier<Rotation2d> positionSetpointSupplier) {
-      setpointSupplier = positionSetpointSupplier;
+    ArmGoal(Supplier<Rotation2d> positionGoalSupplier) {
+      goalSupplier = positionGoalSupplier;
     }
 
     /**
-     * @return The position setpoint associated with that state
+     * @return The position goal
      */
-    private Rotation2d getStateSetpoint() {
-      return this.setpointSupplier.get();
+    private Rotation2d getGoal() {
+      return this.goalSupplier.get();
     }
   }
 
   private final ArmIO ARM_IO;
   private final ArmIOInputsAutoLogged ARM_INPUTS = new ArmIOInputsAutoLogged();
 
-  private ArmState armState = ArmState.STOPPED;
+  private ArmGoal armGoal = null;
   private Rotation2d armPositionSetpoint = new Rotation2d();
 
   private TrapezoidProfile.Constraints currentConstraints = ArmConstants.MOTION_PROFILE_CONSTRAINTS;
@@ -94,6 +92,33 @@ public class Arm extends SubsystemBase {
       setpointState = new TrapezoidProfile.State(ARM_INPUTS.position.getRadians(), 0.0);
     }
 
+    if (armGoal != null) {
+      armPositionSetpoint = armGoal.getGoal();
+      if (armGoal == ArmGoal.STOW) {
+        armPositionSetpoint = ArmConstants.MIN_POSITION;
+      }
+      setpointState =
+          profile.calculate(
+              0.02,
+              setpointState,
+              new TrapezoidProfile.State(
+                  MathUtil.clamp(
+                      armPositionSetpoint.getRadians(),
+                      ArmConstants.MAX_POSITION.getRadians(),
+                      ArmConstants.MIN_POSITION.getRadians()),
+                  0.0));
+      if (armGoal == ArmGoal.STOW
+          && EqualsUtil.epsilonEquals(
+              armPositionSetpoint.getRadians(), ArmConstants.MIN_POSITION.getRadians())
+          && atGoal()) {
+        ARM_IO.stop();
+      } else {
+        ARM_IO.setArmPositionSetpoint(
+            Rotation2d.fromRadians(setpointState.position),
+            FEEDFORWARD.calculate(setpointState.position, setpointState.velocity));
+      }
+    }
+
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> setFeedbackGains(feedbackP.get(), feedbackI.get(), feedbackD.get()),
@@ -105,17 +130,20 @@ public class Arm extends SubsystemBase {
   }
 
   /**
-   * Sets the subsystem's desired state, logic runs in periodic()
+   * Sets the subsystem's desired goal, logic runs in periodic()
    *
-   * @param desiredState The desired state
+   * @param desiredGoal The desired goal
    */
-  public void setArmState(ArmState desiredState) {
-    armState = desiredState;
+  public void setArmGoal(ArmGoal desiredGoal) {
+    armGoal = desiredGoal;
+  }
+
+  public void runArmVoltage(double voltage) {
+    ARM_IO.setArmVoltage(voltage);
   }
 
   /** Stops the IO, sets position setpoint to null, commands subsystem state to STOPPED */
   public void stop() {
-    armState = ArmState.STOPPED;
     armPositionSetpoint = null;
     ARM_IO.stop();
   }
@@ -128,5 +156,27 @@ public class Arm extends SubsystemBase {
   /** Set the trapezoidal motion-profile's constraints */
   private void setMotionConstraints(double maxVelocity, double maxAcceleration) {
     currentConstraints = new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration);
+  }
+
+  @AutoLogOutput(key = "Arm/AtGoal")
+  public boolean atGoal() {
+    return EqualsUtil.epsilonEquals(
+        setpointState.position,
+        armPositionSetpoint.getRadians(),
+        ArmConstants.POSITION_TOLERANCE.getRadians());
+  }
+
+  /**
+   * @return The position of the arm as a Rotation2d
+   */
+  public Rotation2d getPosition() {
+    return ARM_INPUTS.position;
+  }
+
+  /**
+   * @return The angular velocity of the arm in radians per second
+   */
+  public double getVelocityRadPerSec() {
+    return ARM_INPUTS.velocityRadPerSec;
   }
 }

@@ -33,7 +33,16 @@ public class ArmConstants {
 
   public static final int LEAD_MOTOR_ID = 41;
   public static final int FOLLOW_MOTOR_ID = 42;
+
+  public static final boolean USE_CANIVORE = true;
+  public static final String CANBUS = "drivebase";
+
+  public static final boolean USE_ABSOLUTE_ENCODER = false;
   public static final int ABSOLUTE_ENCODER_PORT = 2; // TODO Get this
+
+  // TODO Get these
+  public static final Rotation2d MAX_POSITION = Rotation2d.fromDegrees(0.0);
+  public static final Rotation2d MIN_POSITION = Rotation2d.fromDegrees(0.0);
 
   /*
    * Helpful conversion factors:

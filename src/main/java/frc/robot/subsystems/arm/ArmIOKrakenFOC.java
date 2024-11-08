@@ -44,11 +44,22 @@ public class ArmIOKrakenFOC implements ArmIO {
 
   private final TalonFXConfiguration LEAD_MOTOR_CONFIG = new TalonFXConfiguration();
 
+  @SuppressWarnings("resource") // TODO Why am I getting resources leaks bruh
   public ArmIOKrakenFOC(KrakenConfiguration krakenConfiguration) {
-    LEAD_MOTOR = new TalonFX(ArmConstants.LEAD_MOTOR_ID);
-    FOLLOW_MOTOR = new TalonFX(ArmConstants.FOLLOW_MOTOR_ID);
+    LEAD_MOTOR =
+        ArmConstants.USE_CANIVORE
+            ? new TalonFX(ArmConstants.LEAD_MOTOR_ID, ArmConstants.CANBUS)
+            : new TalonFX(ArmConstants.LEAD_MOTOR_ID);
+    FOLLOW_MOTOR =
+        ArmConstants.USE_CANIVORE
+            ? new TalonFX(ArmConstants.FOLLOW_MOTOR_ID, ArmConstants.CANBUS)
+            : new TalonFX(ArmConstants.FOLLOW_MOTOR_ID);
     FOLLOW_MOTOR.setControl(new Follower(ArmConstants.LEAD_MOTOR_ID, true));
-    ABSOLUTE_ENCODER = new DutyCycleEncoder(ArmConstants.ABSOLUTE_ENCODER_PORT);
+    if (ArmConstants.USE_ABSOLUTE_ENCODER) {
+      ABSOLUTE_ENCODER = new DutyCycleEncoder(ArmConstants.ABSOLUTE_ENCODER_PORT);
+    } else {
+      ABSOLUTE_ENCODER = null;
+    }
 
     LEAD_MOTOR_CONFIG.Slot0.kP = ArmConstants.ARM_GAINS.P();
     LEAD_MOTOR_CONFIG.Slot0.kI = ArmConstants.ARM_GAINS.I();
@@ -127,9 +138,11 @@ public class ArmIOKrakenFOC implements ArmIO {
     inputs.position =
         Rotation2d.fromRotations(
             INTERNAL_POSITION_ROTATION.getValueAsDouble()); // Offset accounted for in configs
-    inputs.absoluteEncoderPosition =
-        Rotation2d.fromRotations(
-            ABSOLUTE_ENCODER.getAbsolutePosition()); // Mounted directly to pivot
+    if (ArmConstants.USE_ABSOLUTE_ENCODER) {
+      inputs.absoluteEncoderPosition =
+          Rotation2d.fromRotations(
+              ABSOLUTE_ENCODER.getAbsolutePosition()); // Mounted directly to pivot
+    }
     inputs.velocityRadPerSec =
         Units.rotationsToRadians(VELOCITY_ROTATION_PER_SEC.getValueAsDouble());
     inputs.appliedVolts =
