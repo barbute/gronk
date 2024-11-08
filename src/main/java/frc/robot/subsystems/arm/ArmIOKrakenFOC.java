@@ -91,6 +91,8 @@ public class ArmIOKrakenFOC implements ArmIO {
 
     LEAD_MOTOR.getConfigurator().apply(LEAD_MOTOR_CONFIG, 1.0);
 
+    LEAD_MOTOR.setPosition(0.0);
+
     INTERNAL_POSITION_ROTATION = LEAD_MOTOR.getPosition();
     VELOCITY_ROTATION_PER_SEC = LEAD_MOTOR.getVelocity();
     APPLIED_VOLTAGE = List.of(LEAD_MOTOR.getMotorVoltage(), FOLLOW_MOTOR.getMotorVoltage());

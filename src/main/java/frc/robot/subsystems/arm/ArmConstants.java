@@ -7,6 +7,7 @@ package frc.robot.subsystems.arm;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 /** Arm constants class */
@@ -31,18 +32,18 @@ public class ArmConstants {
       Rotation2d MAX_ARM_ANGLE,
       Rotation2d START_ARM_ANGLE) {}
 
-  public static final int LEAD_MOTOR_ID = 41;
-  public static final int FOLLOW_MOTOR_ID = 42;
+  public static final int LEAD_MOTOR_ID = 42;
+  public static final int FOLLOW_MOTOR_ID = 41;
 
   public static final boolean USE_CANIVORE = true;
   public static final String CANBUS = "drivebase";
 
   public static final boolean USE_ABSOLUTE_ENCODER = false;
-  public static final int ABSOLUTE_ENCODER_PORT = 2; // TODO Get this
+  public static final int ABSOLUTE_ENCODER_PORT = 0;
 
   // TODO Get these
   public static final Rotation2d MAX_POSITION = Rotation2d.fromDegrees(0.0);
-  public static final Rotation2d MIN_POSITION = Rotation2d.fromDegrees(0.0);
+  public static final Rotation2d MIN_POSITION = Rotation2d.fromDegrees(180.0);
 
   /*
    * Helpful conversion factors:
@@ -69,10 +70,10 @@ public class ArmConstants {
   public static final SimulationConfiguration SIMULATION_ARM_CONFIGURATION =
       new SimulationConfiguration( // TODO Get this
           true,
-          0.0,
-          0.0,
+          0.004,
+          Units.inchesToMeters(12.0),
           Rotation2d.fromDegrees(0.0),
-          Rotation2d.fromDegrees(0.0),
+          Rotation2d.fromDegrees(180.0),
           Rotation2d.fromDegrees(0.0));
 
   public static final Rotation2d POSITION_TOLERANCE = Rotation2d.fromDegrees(1.0);
