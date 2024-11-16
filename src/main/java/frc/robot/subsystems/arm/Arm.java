@@ -54,7 +54,7 @@ public class Arm extends SubsystemBase {
   private Rotation2d armPositionSetpoint = new Rotation2d();
 
   private TrapezoidProfile.Constraints currentConstraints = ArmConstants.MOTION_PROFILE_CONSTRAINTS;
-  private TrapezoidProfile profile;
+  private TrapezoidProfile profile = new TrapezoidProfile(currentConstraints);
   private TrapezoidProfile.State setpointState = new TrapezoidProfile.State();
 
   private final ArmFeedforward FEEDFORWARD =
@@ -138,7 +138,7 @@ public class Arm extends SubsystemBase {
     armGoal = desiredGoal;
   }
 
-  public void runArmVoltage(double voltage) {
+  public void setArmVoltage(double voltage) {
     ARM_IO.setArmVoltage(voltage);
   }
 
