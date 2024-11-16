@@ -76,6 +76,8 @@ public class Arm extends SubsystemBase {
       new LoggedTunableNumber(
           "Arm/Motion/A", ArmConstants.MOTION_PROFILE_CONSTRAINTS.maxAcceleration);
 
+  private ArmVisualizer visualizer;
+
   /** Creates a new Arm. */
   public Arm(ArmIO armIO) {
     ARM_IO = armIO;
@@ -90,6 +92,12 @@ public class Arm extends SubsystemBase {
       stop();
       // Reset profile when disabled
       setpointState = new TrapezoidProfile.State(ARM_INPUTS.position.getRadians(), 0.0);
+    }
+
+    if (visualizer == null) {
+      visualizer = new ArmVisualizer(getPosition());
+    } else {
+      visualizer.updateArmPosition(getPosition());
     }
 
     if (armGoal != null) {
