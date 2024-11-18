@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.arm;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -24,7 +23,7 @@ public class Arm extends SubsystemBase {
     /** Fixed setpoint for optimal intaking */
     STOW(() -> Rotation2d.fromDegrees(0.0)),
     /** Fixed setpoint for optimal scoring into the amp */
-    AMP(() -> Rotation2d.fromDegrees(0.0)),
+    AMP(() -> Rotation2d.fromDegrees(90.0)),
     /** Obtain the best setpoint to shoot from robot's current position */
     AIM(() -> Rotation2d.fromDegrees(0.0)),
     /** Custom setpoint used for debugging purposes */
@@ -105,16 +104,21 @@ public class Arm extends SubsystemBase {
       if (armGoal == ArmGoal.STOW) {
         armPositionSetpoint = ArmConstants.MIN_POSITION;
       }
+      // setpointState =
+      //     profile.calculate(
+      //         0.02,
+      //         setpointState,
+      //         new TrapezoidProfile.State(
+      //             MathUtil.clamp(
+      //                 armPositionSetpoint.getRadians(),
+      //                 ArmConstants.MIN_POSITION.getRadians(),
+      //                 ArmConstants.MAX_POSITION.getRadians()),
+      //             0.0));
       setpointState =
           profile.calculate(
               0.02,
               setpointState,
-              new TrapezoidProfile.State(
-                  MathUtil.clamp(
-                      armPositionSetpoint.getRadians(),
-                      ArmConstants.MAX_POSITION.getRadians(),
-                      ArmConstants.MIN_POSITION.getRadians()),
-                  0.0));
+              new TrapezoidProfile.State(armPositionSetpoint.getRadians(), 0.0));
       if (armGoal == ArmGoal.STOW
           && EqualsUtil.epsilonEquals(
               armPositionSetpoint.getRadians(), ArmConstants.MIN_POSITION.getRadians())
@@ -172,6 +176,36 @@ public class Arm extends SubsystemBase {
         setpointState.position,
         armPositionSetpoint.getRadians(),
         ArmConstants.POSITION_TOLERANCE.getRadians());
+  }
+
+  @AutoLogOutput(key = "Arm/PositionGoal")
+  /**
+   * @return The current goal position of the arm
+   */
+  public Rotation2d getPositionSetpoint() {
+    if (armPositionSetpoint == null) {
+      return new Rotation2d();
+    } else {
+      return armPositionSetpoint;
+    }
+  }
+
+  @AutoLogOutput(key = "Arm/ProfilePositionSetpointRadians")
+  public double getProfilePositionSetpointRadians() {
+    return setpointState.position;
+  }
+
+  @AutoLogOutput(key = "Arm/ProfileVelocitySetpointRadians")
+  public double getProfileVelocitySetpointRadians() {
+    return setpointState.velocity;
+  }
+
+  @AutoLogOutput(key = "Arm/Error")
+  /**
+   * @return The error between the goal position and the current position of the mechanism
+   */
+  public Rotation2d getError() {
+    return getPositionSetpoint().minus(getPosition());
   }
 
   /**

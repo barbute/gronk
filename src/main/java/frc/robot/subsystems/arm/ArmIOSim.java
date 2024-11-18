@@ -54,7 +54,7 @@ public class ArmIOSim implements ArmIO {
   @Override
   public void setArmVoltage(double voltage) {
     closedLoopControl = false;
-    appliedVoltage = MathUtil.clamp(-12.0, 12.0, voltage);
+    appliedVoltage = MathUtil.clamp(voltage, -12.0, 12.0);
 
     ARM.setInputVoltage(appliedVoltage);
   }
@@ -70,7 +70,8 @@ public class ArmIOSim implements ArmIO {
       feedbackNeedsReset = false;
     }
     double setpointVolts =
-        FEEDBACK.calculate(ARM.getAngleRads(), setpoint.getRadians() + positionOffsetRad)
+        FEEDBACK.calculate(
+                ARM.getAngleRads() + positionOffsetRad, setpoint.getRadians() + positionOffsetRad)
             + feedforward;
     setArmVoltage(setpointVolts);
   }
