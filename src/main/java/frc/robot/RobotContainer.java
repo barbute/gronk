@@ -118,6 +118,7 @@ public class RobotContainer {
         () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX());
     drive.setDefaultCommand(
         Commands.run(() -> drive.setDriveState(DriveState.TELEOPERATED), drive));
+    // Reset gyro heading (Odometry)
     controller
         .b()
         .onTrue(
@@ -127,10 +128,12 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    // Arm to subwoofer
     controller
         .a()
         .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.SUBWOOFER), arm))
         .whileFalse(Commands.run(() -> arm.stop(), arm));
+    // Arm to amp
     controller
         .x()
         .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.AMP), arm))
