@@ -133,11 +133,11 @@ public class RobotContainer {
         .a()
         .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.SUBWOOFER), arm))
         .whileFalse(Commands.run(() -> arm.stop(), arm));
-    // Arm to amp
-    controller
-        .x()
-        .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.AMP), arm))
-        .whileFalse(Commands.run(() -> arm.stop(), arm));
+    // // Arm to amp
+    // controller
+    //     .x()
+    //     .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.AMP), arm))
+    //     .whileFalse(Commands.run(() -> arm.stop(), arm));
   }
 
   /**
