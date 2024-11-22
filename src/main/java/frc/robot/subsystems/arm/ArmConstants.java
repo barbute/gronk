@@ -57,12 +57,16 @@ public class ArmConstants {
   public static final ArmGains ARM_GAINS =
       switch (Constants.CURRENT_MODE) {
         case REAL -> new ArmGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        case SIM -> new ArmGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        case SIM -> new ArmGains(6.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         default -> new ArmGains(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       };
 
   public static final TrapezoidProfile.Constraints MOTION_PROFILE_CONSTRAINTS =
-      new TrapezoidProfile.Constraints(2.0 * Math.PI, 15.0);
+      switch (Constants.CURRENT_MODE) {
+        case REAL -> new TrapezoidProfile.Constraints(0.0, 0.0);
+        case SIM -> new TrapezoidProfile.Constraints(2.0 * Math.PI, 15.0);
+        default -> new TrapezoidProfile.Constraints(0.0, 0.0);
+      };
 
   public static final KrakenConfiguration ARM_CONFIGURATION =
       new KrakenConfiguration(true, true, true, 80.0, 30.0, 80.0, -80.0, NeutralModeValue.Brake);
