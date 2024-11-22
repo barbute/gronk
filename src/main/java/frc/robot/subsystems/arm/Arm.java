@@ -19,7 +19,7 @@ public class Arm extends SubsystemBase {
   /** Angular position goal for the Arm */
   public enum ArmGoal {
     /** Fixed setpoint for the subwoofer */
-    SUBWOOFER(() -> Rotation2d.fromDegrees(0.0)),
+    SUBWOOFER(() -> Rotation2d.fromDegrees(90.0)),
     /** Fixed setpoint for optimal intaking */
     STOW(() -> Rotation2d.fromDegrees(0.0)),
     /** Fixed setpoint for optimal scoring into the amp */
@@ -146,8 +146,17 @@ public class Arm extends SubsystemBase {
    *
    * @param desiredGoal The desired goal
    */
-  public void setArmGoal(ArmGoal desiredGoal) {
+  @AutoLogOutput(key = "Arm/ArmGoal")
+  public ArmGoal setArmGoal(ArmGoal desiredGoal) {
     armGoal = desiredGoal;
+
+    if (armGoal != null) {
+      System.out.println("Arm/setArmGoal() : " + armGoal);
+      return armGoal;
+    } else {
+      System.out.println("Arm/setArmGoal() : No arm goal set");
+      return ArmGoal.CUSTOM;
+    }
   }
 
   public void setArmVoltage(double voltage) {
@@ -156,7 +165,7 @@ public class Arm extends SubsystemBase {
 
   /** Stops the IO, sets position setpoint to null, commands subsystem state to STOPPED */
   public void stop() {
-    armPositionSetpoint = null;
+    armGoal = null;
     ARM_IO.stop();
   }
 
@@ -178,10 +187,10 @@ public class Arm extends SubsystemBase {
         ArmConstants.POSITION_TOLERANCE.getRadians());
   }
 
-  @AutoLogOutput(key = "Arm/PositionGoal")
   /**
    * @return The current goal position of the arm
    */
+  @AutoLogOutput(key = "Arm/PositionGoal")
   public Rotation2d getPositionSetpoint() {
     if (armPositionSetpoint == null) {
       return new Rotation2d();

@@ -128,16 +128,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    // Arm to subwoofer
+    // Arm to custom setpoint (settable via NT)
     controller
         .a()
-        .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.SUBWOOFER), arm))
+        .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.CUSTOM), arm))
         .whileFalse(Commands.run(() -> arm.stop(), arm));
-    // // Arm to amp
-    // controller
-    //     .x()
-    //     .whileTrue(Commands.run(() -> arm.setArmGoal(ArmGoal.AMP), arm))
-    //     .whileFalse(Commands.run(() -> arm.stop(), arm));
   }
 
   /**
