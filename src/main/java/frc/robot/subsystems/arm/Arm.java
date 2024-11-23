@@ -104,16 +104,6 @@ public class Arm extends SubsystemBase {
       if (armGoal == ArmGoal.STOW) {
         armPositionSetpoint = ArmConstants.MIN_POSITION;
       }
-      // setpointState =
-      //     profile.calculate(
-      //         0.02,
-      //         setpointState,
-      //         new TrapezoidProfile.State(
-      //             MathUtil.clamp(
-      //                 armPositionSetpoint.getRadians(),
-      //                 ArmConstants.MIN_POSITION.getRadians(),
-      //                 ArmConstants.MAX_POSITION.getRadians()),
-      //             0.0));
       setpointState =
           profile.calculate(
               0.02,
@@ -145,6 +135,7 @@ public class Arm extends SubsystemBase {
    * Sets the subsystem's desired goal, logic runs in periodic()
    *
    * @param desiredGoal The desired goal
+   * @return The arm goal that was set, useful to confirm it was set properly
    */
   @AutoLogOutput(key = "Arm/ArmGoal")
   public ArmGoal setArmGoal(ArmGoal desiredGoal) {
