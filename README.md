@@ -11,7 +11,7 @@ gronk is an [FRC Robot program](https://docs.wpilib.org/en/stable/docs/software/
 - [Acknowledgements](#acknowledgements)
 
 ## Description
-The robot is based off of FRC [Team 2056](https://www.thebluealliance.com/team/2056)'s robot for the 2024 FRC season. It is a swerve drive with an arm in the middle, and a shooter as its end-affector. There is a full-width intake spanning the back of the robot, that passes a note to the shooter when the arm is in its resting position.
+The robot design is based off of FRC [Team 2056](https://www.thebluealliance.com/team/2056)'s robot for the 2024 FRC season. It is a swerve drive with an arm in the middle, and a shooter as its end-affector. There is a full-width intake spanning the back of the robot, that passes a note to the shooter when the arm is in its resting position.
 
 This code is currently structured using subsystems, where each subsystem is used to control a major component of the robot (E.g. Drivetrain, Arm). Each subsystem, or group of subsystems, has a set of desired states it may be in. These state's dictate what those subsystems will do.
 
@@ -47,12 +47,17 @@ Ensure your system meets the project's [requirements](#requirements).
   - Must be version 2024.3.2
 
 ## Usage
-Robots obviously differ from each other substantially. If you are looking to use part of this code for your own robot, make sure that you understand what each function is doing *in context*.
+Robots obviously differ from each other. If you are looking to use part of this code for your own robot, make sure that you understand what each function is doing *in context*.
 
-If you are looking to use the entire subsystems, and keep the logic with the hardware implementation, you may simply edit the constants file for that subsystem, located in its respective directory. The constants file serves as a "map" for that subsystem, where each value represents an aspect of the physical robot that needs to be used in code.
+If you are looking to use an entire subsystems, and keep the logic with the hardware implementation, you may simply edit the constants file for that subsystem, located in its respective directory. The constants file serves as a "map" for that subsystem, where each value represents an aspect of the physical robot that needs to be used in code.
 
-When PID tuning, the gains for the controllers, as well as their custom setpoints and published to NetworkTables via the [LoggedTunableNumber](src/main/java/frc/robot/util/debugging/LoggedTunableNumber.java) class. This allows for tuning controllers without needing to re-deploy the code each time you update a gain. If you wish to actually save a gain that you've tuned, copy that value into the respective variable for that subsystem's constants file.
+When PID tuning, the gains for the controllers as well as their custom setpoints and published to NetworkTables via the [LoggedTunableNumber](src/main/java/frc/robot/util/debugging/LoggedTunableNumber.java) class. This allows for tuning controllers without needing to re-deploy the code each time you update a gain. If you wish to actually save a gain that you've tuned, copy that value into the respective variable for that subsystem's constants file.
 
 ## License
+This project is licesnsed under the GNU General Public License v3.0. See the [LICENSE file](/AdvantageKit-License.md) for more information.
 
 ## Acknowledgements
+- Thanks to [AnshulBompada](https://github.com/AnshulBompada) for reviewing some aspects of the code
+- Thanks to [Jelatinone](https://github.com/Jelatinone) for inspiration on the [Installtion](#installation) section of this README file
+- Thanks to FRC [Team 6328](https://github.com/Mechanical-Advantage) for using their [AdvantageKit template](https://github.com/Mechanical-Advantage/AdvantageKit/releases/tag/v3.2.1) code, as well as inspiration for controlling the Arm and the [Alert](src/main/java/frc/robot/util/debugging/Alert.java) and [LoggedTunableNumber](src/main/java/frc/robot/util/debugging/LoggedTunableNumber.java) utility classes
+  - Also thanks for inspiring the control scheme of the drive subsystem, where "controllers" are used to modify the behavior of the drive
