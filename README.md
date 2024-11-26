@@ -23,7 +23,7 @@ This project utilizes [AdvantageKit](https://github.com/Mechanical-Advantage/Adv
 
 ### Packages
 - [`frc.robot.subsystems`](src/main/java/frc/robot/subsystems/)
-  
+
   Contains control logic for each subsystem of the robot. Some subsystems may be nested under a state-machine for ease of management.
 
 - [`frc.robot.util`](src/main/java/frc/robot/util)
@@ -47,6 +47,11 @@ Ensure your system meets the project's [requirements](#requirements).
   - Must be version 2024.3.2
 
 ## Usage
+Robots obviously differ from each other substantially. If you are looking to use part of this code for your own robot, make sure that you understand what each function is doing *in context*.
+
+If you are looking to use the entire subsystems, and keep the logic with the hardware implementation, you may simply edit the constants file for that subsystem, located in its respective directory. The constants file serves as a "map" for that subsystem, where each value represents an aspect of the physical robot that needs to be used in code.
+
+When PID tuning, the gains for the controllers, as well as their custom setpoints and published to NetworkTables via the [LoggedTunableNumber](src/main/java/frc/robot/util/debugging/LoggedTunableNumber.java) class. This allows for tuning controllers without needing to re-deploy the code each time you update a gain. If you wish to actually save a gain that you've tuned, copy that value into the respective variable for that subsystem's constants file.
 
 ## License
 
