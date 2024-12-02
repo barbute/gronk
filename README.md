@@ -58,6 +58,6 @@ This project is licesnsed under the GNU General Public License v3.0. See the [LI
 
 ## Acknowledgements
 - Thanks to [AnshulBompada](https://github.com/AnshulBompada) for reviewing some aspects of the code
-- Thanks to [Jelatinone](https://github.com/Jelatinone) for inspiration on the [Installtion](#installation) section of this README file
+- Thanks to [Jelatinone](https://github.com/Jelatinone) for inspiration on the [Installation](#installation) section of this README file
 - Thanks to FRC [Team 6328](https://github.com/Mechanical-Advantage) for using their [AdvantageKit template](https://github.com/Mechanical-Advantage/AdvantageKit/releases/tag/v3.2.1) code, as well as inspiration for controlling the Arm and the [Alert](src/main/java/frc/robot/util/debugging/Alert.java) and [LoggedTunableNumber](src/main/java/frc/robot/util/debugging/LoggedTunableNumber.java) utility classes
   - Also thanks for inspiring the control scheme of the drive subsystem, where "controllers" are used to modify the behavior of the drive
