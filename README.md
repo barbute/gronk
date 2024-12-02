@@ -1,5 +1,5 @@
 # gronk
-gronk is an [FRC Robot program](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html) written in Java designed to control Prosper Robotics 2024 offseason robot *Redux* - an SDS MK4i L2 Kraken Motor swerve drive. The robot was designed for the 2024 FRC Season's game: [Cresdendo](https://www.firstinspires.org/robotics/frc/game-and-season).
+gronk is an [FRC Robot program](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html) written in Java designed to control Prosper Robotics 2024 offseason robot *Redux* - an SDS MK4i L2 Kraken Motor swerve drive. The robot was designed for the 2024 FRC Season's game: [Cresdendo](https://www.firstinspires.org/robotics/frc/game-and-season). **This is a personal project is intended for simulation use cases only, and is not meant to be ran on any physical hardware in its current state**.
 
 ## Table of Contents
 - [Description](#description)
@@ -39,7 +39,7 @@ Ensure your system meets the project's [requirements](#requirements).
 ### Requirements
 
 > [!NOTE]
-> This project currently uses WPILib 2024.3.2, but will likely be migrating to the 2025 beta soon (if I continue to maintain this project of course)
+> This project currently uses WPILib 2024.3.2, but will likely be migrating to the 2025 beta soon (if I continue to maintain this project)
 
 - [JDK 17 +](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 - [WPI VSCode](https://github.com/wpilibsuite/allwpilib/releases/tag/v2024.3.2)
