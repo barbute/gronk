@@ -3,6 +3,8 @@ gronk is an [FRC Robot program](https://docs.wpilib.org/en/stable/docs/software/
 
 ## Table of Contents
 - [Description](#description)
+  - [Todo](#todo)
+  - [AdvantageKit](#advantagekit)
   - [Packages](#packages)
 - [Installation](#installation)
   - [Requirements](#requirements)
@@ -17,6 +19,17 @@ This code is currently structured using subsystems, where each subsystem is used
 
 > [!NOTE]
 > Currently the code is a work-in-progress. I intend to tie the arm and shooter together into a superstructure class and that class will dictate the state's for those subsystems.
+
+### TODO
+A personal todo of things to complete
+
+- [ ] Refactor arm code
+  - [ ] Instead of a set of "states" use goals
+  - [ ] Change how constants and configurations are setup (store the Kraken config object?? Though then it wouldn't be cross motor compatable soz)
+- [ ] Add intake code
+- [ ] Add flywheel + indexer code
+- [ ] Add superstructure code
+  - [ ] Proper inter-op between subsystems and the supertructure with the drive
 
 ### AdvantageKit
 This project utilizes [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit), a logging framework developed by FRC [Team 6328](https://www.thebluealliance.com/team/6328). Thus, each subsystem is structured to have a hardware and simulation interface. For more information about structuring an AdvantageKit project, see [here](https://docs.advantagekit.org/recording-inputs/io-interfaces).
